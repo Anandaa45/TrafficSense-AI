@@ -7,7 +7,6 @@ const navItems = [
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/settings', label: 'Settings', icon: Settings },
-  { to: '/profile', label: 'Profil', icon: UserCircle },
 ];
 
 const titles = {
