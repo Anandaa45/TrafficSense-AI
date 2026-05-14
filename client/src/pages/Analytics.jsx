@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -150,3 +151,4 @@ function Progress({ label, value }) {
     </div>
   );
 }
+

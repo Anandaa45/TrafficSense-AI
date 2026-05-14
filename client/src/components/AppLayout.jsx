@@ -1,3 +1,4 @@
+import React from 'react';
 import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import {
   Activity,
@@ -139,3 +140,4 @@ export default function AppLayout() {
     </div>
   );
 }
+

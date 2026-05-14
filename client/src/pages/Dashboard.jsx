@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Camera, CheckCircle2, CarFront, SlidersHorizontal } from 'lucide-react';
 import SummaryCard from '../components/SummaryCard.jsx';
@@ -157,3 +158,4 @@ function TrafficLineChart({ data }) {
     </div>
   );
 }
+

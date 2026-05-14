@@ -1,3 +1,4 @@
+import React from 'react';
 import { Activity } from 'lucide-react';
 
 export default function AuthShell({ title, subtitle, children, footer }) {
@@ -16,3 +17,4 @@ export default function AuthShell({ title, subtitle, children, footer }) {
     </main>
   );
 }
+

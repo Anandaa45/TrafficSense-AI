@@ -1,3 +1,4 @@
+import React from 'react';
 export default function SummaryCard({ icon, title, value, subtitle, badge, badgeTone = 'emerald', accent = 'cyan' }) {
   const tones = {
     emerald: 'bg-emerald-500/10 text-emerald-400',
@@ -25,3 +26,4 @@ export default function SummaryCard({ icon, title, value, subtitle, badge, badge
     </div>
   );
 }
+

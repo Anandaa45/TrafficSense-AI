@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCcw, Search, Volume2, Expand, MapPin } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -103,3 +104,4 @@ function Stat({ label, value, tone = 'text-white' }) {
     </div>
   );
 }
+

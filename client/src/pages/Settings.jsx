@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { Monitor, Moon, Sun, Globe, Clock3 } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -70,3 +71,4 @@ function SettingField({ icon, label, value }) {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, Mail } from 'lucide-react';
@@ -63,3 +64,4 @@ export default function Login() {
     </AuthShell>
   );
 }
+

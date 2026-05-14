@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { MapPin, Building2, Mail, ShieldCheck, Smartphone } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -126,3 +127,4 @@ function Info({ label, value, secondary, icon }) {
 function Pill({ icon, text }) {
   return <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">{icon}{text}</span>;
 }
+

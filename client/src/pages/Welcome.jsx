@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Activity, Shield, Eye, TrendingUp, Zap } from 'lucide-react';
 
@@ -105,3 +106,4 @@ export default function Welcome() {
     </main>
   );
 }
+

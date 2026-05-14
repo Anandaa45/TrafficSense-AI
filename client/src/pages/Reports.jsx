@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { Search, Download, ChevronDown } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -99,3 +100,4 @@ function TypeBadge({ type }) {
   };
   return <span className={`rounded-full border px-3 py-1 text-xs font-bold ${styles[type]}`}>{type}</span>;
 }
+
