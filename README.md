@@ -1,89 +1,128 @@
-# TrafficSense AI Fullstack
+# TrafficSense AI - Fullstack Web App
 
-Project ini dibuat berdasarkan referensi desain Figma/screenshot yang kamu kirim, dengan stack:
+Project ini berisi frontend + backend + database PostgreSQL untuk tema **TrafficSense AI Dashboard**.
 
-- **Frontend:** React + Vite + Tailwind CSS
-- **Backend:** Express.js
-- **Database:** PostgreSQL
-- **Migration:** node-pg-migrate
+## Stack
 
-## Fitur halaman
+- Frontend: React + Vite + Tailwind CSS
+- Backend: Express.js
+- Database: PostgreSQL
+- Migration: node-pg-migrate
 
-- Welcome / landing page
-- Register
-- Login
-- Dashboard
-- Traffic Monitor
-- Analytics
-- Reports
-- Settings
-- Profile
+## Struktur Folder
 
-## Cara menjalankan
+```txt
+trafficsense-ai-fullstack/
+├─ client/   # Frontend React
+└─ server/   # Backend Express + PostgreSQL
+```
 
-### 1) Buat database PostgreSQL
+---
+
+## 1. Setup Database PostgreSQL
+
+Buat database di PostgreSQL:
 
 ```sql
 CREATE DATABASE trafficsense_ai;
 ```
 
-### 2) Jalankan backend
+---
+
+## 2. Setup Backend
+
+Masuk ke folder server:
 
 ```bash
 cd server
 npm install
+```
+
+Copy env:
+
+```bash
 cp .env.example .env
+```
+
+Isi `.env` sesuai database kamu:
+
+```env
+PORT=5000
+PGUSER=postgres
+PGPASSWORD=password_kamu
+PGDATABASE=trafficsense_ai
+PGHOST=localhost
+PGPORT=5432
+```
+
+Jalankan migration:
+
+```bash
 npm run migrate:up
+```
+
+Jalankan backend:
+
+```bash
 npm run dev
 ```
 
-### 3) Jalankan frontend
+Backend berjalan di:
+
+```txt
+http://localhost:5000
+```
+
+---
+
+## 3. Setup Frontend
+
+Buka terminal baru, masuk folder client:
 
 ```bash
 cd client
 npm install
+```
+
+Copy env:
+
+```bash
 cp .env.example .env
+```
+
+Jalankan frontend:
+
+```bash
 npm run dev
 ```
 
-Frontend default berjalan di:
+Frontend berjalan di:
 
-```text
+```txt
 http://localhost:5173
 ```
 
-Backend default berjalan di:
+---
 
-```text
-http://localhost:5000
+## Endpoint Backend
+
+```txt
+GET  /api/health
+GET  /api/metrics
+GET  /api/intersections
+GET  /api/incidents
+POST /api/incidents
+GET  /api/ai/recommendations
+GET  /api/sessions
+POST /api/sessions
 ```
 
-## Akun demo
+---
 
-Setelah migration berhasil, akun demo yang tersedia:
+## Hosting Rekomendasi
 
-```text
-Email    : admin@gmail.com
-Password : admin12345
-```
+- Frontend: Vercel
+- Backend: Render / Railway
+- Database: Supabase / Neon / Railway PostgreSQL
 
-## Endpoint utama
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/overview`
-- `GET /api/monitor/cameras`
-- `GET /api/analytics`
-- `GET /api/reports`
-- `GET /api/settings`
-- `GET /api/profile`
-
-## Catatan
-
-Project ini sudah disesuaikan dengan nuansa desain dark dashboard pada screenshot yang kamu kirim. Kalau kamu mau, langkah berikutnya saya bisa bantu lagi untuk:
-
-1. menambahkan **JWT authentication**,
-2. membuat **CRUD kamera / laporan / user**,
-3. menghubungkan **upload PDF laporan**,
-4. menambahkan **grafik real dengan chart library**,
-5. deploy ke **hosting + domain**.
+Setelah backend di-hosting, ubah `VITE_API_BASE_URL` di frontend menjadi URL backend kamu.

@@ -1,103 +1,29 @@
 import React from 'react';
-import { useEffect, useMemo, useState } from 'react';
-import { Search, Download, ChevronDown } from 'lucide-react';
-import { api } from '../lib/api.js';
+import { AlertTriangle, ChevronRight, Download, FileText, Search } from 'lucide-react';
 
 export default function Reports() {
-  const [data, setData] = useState(null);
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState('Semua');
-
-  useEffect(() => {
-    api.get('/reports').then(setData);
-  }, []);
-
-  const rows = useMemo(() => {
-    if (!data) return [];
-    return data.items.filter((item) => {
-      const matchQuery = item.title.toLowerCase().includes(query.toLowerCase());
-      const matchType = type === 'Semua' || item.type === type;
-      return matchQuery && matchType;
-    });
-  }, [data, query, type]);
-
-  if (!data) return <div className="panel p-6 text-slate-300">Memuat laporan...</div>;
-
+  const incidents = [
+    ['Jl. Sudirman', 'macet', '2j 18m', 48, '07:42', 'Resolved'],
+    ['Bundaran HI', 'kecelakaan', '45m', 32, '09:15', 'Resolved'],
+    ['Jl. TB Simatupang', 'macet', '1j 32m', 51, '17:30', 'Aktif'],
+    ['Jl. Gatot Subroto', 'macet', '55m', 38, '18:05', 'Aktif'],
+  ];
+  const reports = [
+    ['RPT-2026-001', 'Laporan Harian — 14 Mei 2026', 'Harian', '2.8 MB'],
+    ['RPT-2026-W01', 'Laporan Mingguan — Minggu ke-1', 'Mingguan', '8.5 MB'],
+    ['RPT-2026-05', 'Laporan Bulanan — Mei 2026', 'Bulanan', '25.1 MB'],
+  ];
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <StatBox label="Total Laporan" value={data.summary.totalReports} color="text-cyan-300" />
-        <StatBox label="Laporan Bulan Ini" value={data.summary.monthlyReports} color="text-violet-300" />
-        <StatBox label="Insiden Aktif" value={data.summary.activeIncidents} color="text-rose-400" />
-        <StatBox label="Insiden Resolved" value={data.summary.resolvedIncidents} color="text-emerald-400" />
-      </div>
+    <div className="space-y-6">
+      <section className="card-dark overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-700 p-5"><h3 className="flex items-center gap-2 text-xl font-extrabold"><AlertTriangle size={18} className="text-rose-400"/> Insiden Hari Ini</h3><span className="text-sm text-slate-400">18 Mei 2025</span></div>
+        {incidents.map(([loc, type, dur, veh, time, status]) => <div key={loc} className="flex items-center justify-between border-b border-slate-800 p-5 last:border-0"><div className="flex items-start gap-4"><span className={`mt-1 h-3 w-3 rounded-full ${status === 'Aktif' ? 'bg-rose-500' : 'bg-emerald-400'}`}/><div><p className="font-extrabold">{loc}</p><p className="mt-1 text-sm text-slate-400">Tipe: {type} &nbsp; Durasi: {dur} &nbsp; {veh} kendaraan</p></div></div><div className="flex items-center gap-4 text-right"><div><p className="text-sm text-slate-400">{time}</p><p className={status === 'Aktif' ? 'text-rose-400' : 'text-emerald-400'}>{status}</p></div><ChevronRight size={18} className="text-slate-500"/></div></div>)}
+      </section>
 
-      <div className="panel overflow-hidden">
-        <div className="flex flex-col gap-4 border-b border-white/8 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-6">
-          <h3 className="text-[36px] font-extrabold">Daftar Laporan</h3>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slate-400">
-              <Search size={16} />
-              <input className="w-full bg-transparent outline-none placeholder:text-slate-500" placeholder="Cari laporan..." value={query} onChange={(e) => setQuery(e.target.value)} />
-            </label>
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-              <select className="bg-transparent outline-none" value={type} onChange={(e) => setType(e.target.value)}>
-                <option className="text-slate-900">Semua</option>
-                <option className="text-slate-900">Harian</option>
-                <option className="text-slate-900">Mingguan</option>
-                <option className="text-slate-900">Bulanan</option>
-              </select>
-              <ChevronDown size={16} />
-            </label>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-white/2 text-slate-400">
-              <tr>
-                {['ID', 'Judul', 'Tipe', 'Lokasi', 'Kendaraan', 'Insiden', 'Tanggal', 'Ukuran', 'Aksi'].map((header) => (
-                  <th key={header} className="px-4 py-4 font-medium md:px-6">{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((item) => (
-                <tr key={item.id} className="border-t border-white/8 text-slate-200">
-                  <td className="px-4 py-4 md:px-6">{item.id}</td>
-                  <td className="px-4 py-4 font-medium text-white md:px-6">{item.title}</td>
-                  <td className="px-4 py-4 md:px-6"><TypeBadge type={item.type} /></td>
-                  <td className="px-4 py-4 md:px-6">{item.locations}</td>
-                  <td className="px-4 py-4 md:px-6">{item.vehicles.toLocaleString('id-ID')}</td>
-                  <td className={`px-4 py-4 font-semibold md:px-6 ${item.incidents > 10 ? 'text-rose-400' : 'text-cyan-300'}`}>{item.incidents}</td>
-                  <td className="px-4 py-4 md:px-6">{item.date}</td>
-                  <td className="px-4 py-4 md:px-6">{item.size}</td>
-                  <td className="px-4 py-4 md:px-6"><button className="inline-flex items-center gap-2 font-bold text-cyan-300"><Download size={15} /> PDF</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <section className="card-dark p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><h3 className="text-xl font-extrabold">Daftar Laporan</h3><label className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-slate-400"><Search size={16}/><input className="bg-transparent outline-none" placeholder="Cari laporan..."/></label></div>
+        <div className="mt-5 overflow-x-auto"><table className="min-w-full text-left text-sm"><thead className="text-slate-400"><tr><th className="py-3">ID</th><th>Judul</th><th>Tipe</th><th>Ukuran</th><th>Aksi</th></tr></thead><tbody>{reports.map(([id,title,type,size]) => <tr key={id} className="border-t border-slate-800"><td className="py-4 text-slate-300">{id}</td><td className="font-semibold">{title}</td><td><span className="status-pill border-cyan-400/40 bg-cyan-400/10 text-cyan-300">{type}</span></td><td className="text-slate-400">{size}</td><td><button className="inline-flex items-center gap-2 text-cyan-300"><Download size={15}/> PDF</button></td></tr>)}</tbody></table></div>
+      </section>
     </div>
   );
 }
-
-function StatBox({ label, value, color }) {
-  return (
-    <div className="panel p-5">
-      <p className={`text-lg ${color}`}>{label}</p>
-      <p className={`mt-3 text-[42px] font-extrabold ${color}`}>{value}</p>
-    </div>
-  );
-}
-
-function TypeBadge({ type }) {
-  const styles = {
-    Harian: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
-    Mingguan: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
-    Bulanan: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-  };
-  return <span className={`rounded-full border px-3 py-1 text-xs font-bold ${styles[type]}`}>{type}</span>;
-}
-

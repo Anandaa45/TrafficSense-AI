@@ -1,67 +1,19 @@
 import React from 'react';
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, Mail } from 'lucide-react';
-import AuthShell from '../components/AuthShell.jsx';
-import { api } from '../lib/api.js';
+import { Link } from 'react-router-dom';
+import { Activity, LogIn, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError('');
-
-    try {
-      setLoading(true);
-      const result = await api.post('/auth/login', { email, password });
-      localStorage.setItem('trafficsense_user', JSON.stringify(result.user));
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputClass = 'w-full rounded-[18px] border border-white/10 bg-[#07122f] px-4 py-4 pr-11 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/60';
-
   return (
-    <AuthShell
-      title="Selamat Datang"
-      subtitle="Masuk ke akun TrafficSense Anda"
-      footer={<>Belum punya akun? <Link to="/register" className="font-bold text-cyan-300">Daftar sekarang</Link></>}
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <label className="block">
-          <span className="mb-3 block text-sm uppercase tracking-wide text-slate-300">EMAIL</span>
-          <div className="relative">
-            <input className={inputClass} placeholder="nama@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Mail className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-          </div>
-        </label>
-        <label className="block">
-          <div className="mb-3 flex items-center justify-between text-sm uppercase tracking-wide text-slate-300">
-            <span>PASSWORD</span>
-            <span className="text-cyan-300 normal-case">Lupa password?</span>
-          </div>
-          <div className="relative">
-            <input type="password" className={inputClass} placeholder="Masukkan password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <Eye className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-          </div>
-        </label>
-
-        {error ? <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p> : null}
-
-        <button disabled={loading} className="w-full rounded-[18px] bg-gradient-to-r from-cyan-400 to-blue-600 px-6 py-4 text-lg font-extrabold text-white shadow-lg shadow-cyan-500/20 disabled:opacity-60">
-          {loading ? 'Memproses...' : 'Masuk'}
-        </button>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-r from-[#060b1d] via-[#0b2442] to-[#060b1d] p-6 text-white">
+      <form className="w-full max-w-md rounded-3xl border border-slate-700 bg-white/10 p-8 backdrop-blur">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-cyan-500"><Activity size={28}/></div>
+        <h1 className="text-center text-3xl font-extrabold">Selamat Datang</h1>
+        <p className="mt-2 text-center text-slate-400">Masuk ke akun TrafficSense Anda</p>
+        <label className="mt-8 block"><span className="text-sm font-bold text-slate-300">EMAIL</span><div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-700 bg-[#081126] px-4 py-3"><input className="w-full bg-transparent outline-none" placeholder="nama@example.com"/><Mail size={18} className="text-slate-500"/></div></label>
+        <label className="mt-5 block"><span className="text-sm font-bold text-slate-300">PASSWORD</span><div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-700 bg-[#081126] px-4 py-3"><input className="w-full bg-transparent outline-none" type="password" placeholder="Masukkan password"/><Lock size={18} className="text-slate-500"/></div></label>
+        <Link to="/dashboard" className="mt-8 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 px-6 py-4 font-extrabold"><LogIn size={18}/> Masuk</Link>
+        <p className="mt-6 text-center text-sm text-slate-400">Belum punya akun? <span className="font-bold text-cyan-300">Daftar sekarang</span></p>
       </form>
-    </AuthShell>
+    </main>
   );
 }
-

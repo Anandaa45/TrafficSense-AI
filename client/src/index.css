@@ -1,52 +1,13 @@
 @import "tailwindcss";
 
-:root {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  color: #ffffff;
-  background-color: #02081f;
+@theme {
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
-html, body, #root {
-  min-height: 100%;
-}
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font-jakarta); background: #060b1d; color: white; }
+* { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  background:
-    radial-gradient(circle at 35% 20%, rgba(14, 165, 233, 0.22), transparent 28%),
-    linear-gradient(90deg, #01081f 0%, #03133d 48%, #01081f 100%);
-  color: white;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-button, input, select {
-  font: inherit;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(102, 125, 173, 0.35);
-  border-radius: 9999px;
-}
-
-.panel {
-  @apply rounded-[28px] border border-white/10 bg-[#091333]/90 shadow-[0_24px_80px_rgba(0,0,0,0.35)];
-}
-
-.glow-border {
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.2), 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.grid-pattern {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
+.card-dark { @apply rounded-2xl border border-slate-700/70 bg-[#0b1228] shadow-xl shadow-black/10; }
+.soft-panel { @apply rounded-2xl border border-slate-700/70 bg-[#121b34]; }
+.status-pill { @apply rounded-full border px-3 py-1 text-xs font-bold; }
