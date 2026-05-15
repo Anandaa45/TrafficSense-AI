@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Activity, BarChart3, Bell, Database, FileText, LayoutDashboard, LogOut, Menu, RefreshCw, Search, Settings, Wifi } from 'lucide-react';
+import { LayoutDashboard, Monitor, BarChart3, FileText, Settings } from 'lucide-react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
