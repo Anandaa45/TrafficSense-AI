@@ -4,10 +4,8 @@ import {
   Activity,
   BarChart3,
   Bell,
-  Database,
   FileText,
   LayoutDashboard,
-  LogOut,
   Menu,
   Monitor,
   RefreshCw,
@@ -23,6 +21,16 @@ const navItems = [
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
+
+const titles = {
+  '/dashboard': ['Dashboard', 'Overview sistem deteksi lalu lintas real-time'],
+  '/monitor': ['Traffic Monitor', 'Pemantauan live feed kamera CCTV'],
+  '/analytics': ['Analytics', 'Analisis mendalam data kepadatan lalu lintas'],
+  '/reports': ['Reports', 'Laporan historis dan ringkasan deteksi'],
+  '/settings': ['Settings', 'Konfigurasi sistem dan model AI'],
+  '/profile': ['Profil Pengguna', 'Kelola informasi akun dan akses perangkat Anda'],
+};
+
 export default function AppLayout() {
   const location = useLocation();
   const [title, subtitle] = titles[location.pathname] || titles['/dashboard'];
