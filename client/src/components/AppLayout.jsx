@@ -1,23 +1,28 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Activity, BarChart3, Bell, Database, FileText, LayoutDashboard, LogOut, Menu, RefreshCw, Search, Settings, Wifi } from 'lucide-react';
-import { LayoutDashboard, Monitor, BarChart3, FileText, Settings } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  Database,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Monitor,
+  RefreshCw,
+  Search,
+  Settings,
+  Wifi,
+} from 'lucide-react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/monitor', label: 'Traffic Monitor', icon: Monitor },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
-
-const titles = {
-  '/dashboard': ['Dashboard', 'Overview sistem deteksi lalu lintas real-time'],
-  '/analytics': ['Analytics', 'Analisis mendalam data kepadatan lalu lintas'],
-  '/reports': ['Reports', 'Laporan historis dan ringkasan deteksi'],
-  '/settings': ['Settings', 'Konfigurasi sistem dan model AI'],
-  '/profile': ['Profil Pengguna', 'Kelola informasi akun dan akses perangkat Anda'],
-};
-
 export default function AppLayout() {
   const location = useLocation();
   const [title, subtitle] = titles[location.pathname] || titles['/dashboard'];
