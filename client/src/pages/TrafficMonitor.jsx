@@ -59,7 +59,7 @@ export default function TrafficMonitor() {
       {activeCamera ? (
         <div className="panel overflow-hidden p-4 md:p-5">
           <div className="relative overflow-hidden rounded-[28px]">
-            <img src={activeCamera.image_url} alt={activeCamera.name} className="h-[390px] w-full object-cover brightness-90 md:h-[470px]" />
+            <imgCameraStream camera={activeCamera} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#06102d] via-transparent to-transparent" />
             <div className="absolute left-4 top-4 flex items-center gap-3">
               <span className="rounded-full bg-black/60 px-3 py-2 text-sm font-bold text-emerald-400">● LIVE • {activeCamera.time}</span>
@@ -101,7 +101,58 @@ function Stat({ label, value, tone = 'text-white' }) {
     <div className="rounded-[22px] border border-white/10 bg-[#08122f] p-4">
       <p className="text-sm text-slate-400">{label}</p>
       <p className={`mt-2 text-[30px] font-extrabold ${tone}`}>{value}</p>
+    </div>function CameraStream({ camera }) {
+  if (!camera?.stream_url) {
+    return (
+      <img
+        src={camera.image_url}
+        alt={camera.name}
+        className="h-[390px] w-full object-cover brightness-90 md:h-[470px]"
+      />
+    );
+  }
+
+  if (camera.stream_type === 'iframe') {
+  return (
+    <div className="flex h-[390px] w-full flex-col items-center justify-center rounded-[28px] bg-black/60 text-center md:h-[470px]">
+      <p className="text-lg font-bold text-white">
+        Live CCTV tersedia di sumber resmi
+      </p>
+
+      <p className="mt-2 text-sm text-slate-400">
+        Klik tombol di bawah untuk membuka kamera OpenCCTV.
+      </p>
+
+      <a
+        href={camera.stream_url}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-5 rounded-2xl bg-cyan-500 px-5 py-3 font-bold text-white"
+      >
+        Buka CCTV Resmi
+      </a>
     </div>
+  );
+}
+
+  if (camera.stream_type === 'image') {
+    return (
+      <img
+        src={camera.stream_url}
+        alt={camera.name}
+        className="h-[390px] w-full object-cover brightness-90 md:h-[470px]"
+      />
+    );
+  }
+
+  return (
+    <img
+      src={camera.image_url}
+      alt={camera.name}
+      className="h-[390px] w-full object-cover brightness-90 md:h-[470px]"
+    />
+  );
+}
   );
 }
 
