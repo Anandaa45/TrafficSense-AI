@@ -1,41 +1,261 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Activity, ArrowRight, Eye, Shield, TrendingUp, Zap } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { Radio, Zap, Shield, Eye, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
-export default function Welcome() {
+export function Welcome() {
+  const navigate = useNavigate();
+  const [mounted, setMounted] = useState(false);
+  const { activeTheme } = useTheme();
+  const isDark = activeTheme === "dark";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const features = [
-    ['AI-Powered Detection', 'YOLOv8 real-time object detection', Zap, 'bg-orange-500'],
-    ['Secure Access', 'Role-based authentication system', Shield, 'bg-sky-500'],
-    ['Real-time Monitor', '24/7 traffic surveillance', Eye, 'bg-pink-500'],
-    ['Advanced Analytics', 'Data-driven insights', TrendingUp, 'bg-emerald-500'],
+    {
+      icon: Zap,
+      title: "AI-Powered Detection",
+      desc: "YOLOv8 real-time object detection",
+      color: "from-yellow-400 to-orange-500",
+      delay: "delay-100"
+    },
+    {
+      icon: Shield,
+      title: "Secure Access",
+      desc: "Role-based authentication system",
+      color: "from-[#00d4ff] to-[#0066ff]",
+      delay: "delay-200"
+    },
+    {
+      icon: Eye,
+      title: "Real-time Monitor",
+      desc: "24/7 traffic surveillance",
+      color: "from-purple-400 to-pink-500",
+      delay: "delay-300"
+    },
+    {
+      icon: TrendingUp,
+      title: "Advanced Analytics",
+      desc: "Data-driven insights",
+      color: "from-[#00ff88] to-[#00cc66]",
+      delay: "delay-[400ms]"
+    }
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-r from-[#060b1d] via-[#0b2442] to-[#060b1d] px-6 py-10 text-white">
-      <div className="mx-auto grid min-h-[calc(100vh-80px)] max-w-7xl items-center gap-12 lg:grid-cols-2">
-        <section>
-          <div className="mb-12 inline-flex items-center gap-3 rounded-full border border-slate-700 bg-white/5 px-4 py-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500"><Activity size={18}/></span>
-            <span className="font-extrabold">TrafficSense AI</span>
-          </div>
-          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">Smart Traffic <span className="block bg-gradient-to-r from-cyan-300 via-violet-300 to-emerald-300 bg-clip-text text-transparent">Monitoring</span></h1>
-          <p className="mt-6 max-w-xl text-xl leading-9 text-slate-400">Platform monitoring lalu lintas berbasis AI dengan analitik real-time dan deteksi otomatis.</p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link to="/login" className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 px-8 py-4 font-extrabold">Masuk <ArrowRight size={20}/></Link>
-            <Link to="/dashboard" className="rounded-2xl border border-slate-700 bg-white/5 px-8 py-4 font-extrabold">Lihat Dashboard</Link>
-          </div>
-          <div className="mt-12 grid max-w-md grid-cols-3 gap-6">
-            {['24/7 Monitoring', '96.4% Akurasi AI', '18+ Kamera Aktif'].map((item) => {
-              const [num, ...rest] = item.split(' ');
-              return <div key={item}><p className="text-3xl font-extrabold">{num}</p><p className="text-sm text-slate-400">{rest.join(' ')}</p></div>;
-            })}
-          </div>
-        </section>
-        <section className="grid gap-5 sm:grid-cols-2">
-          {features.map(([title, text, Icon, color]) => <div key={title} className="card-dark p-6"><span className={`flex h-14 w-14 items-center justify-center rounded-2xl ${color}`}><Icon/></span><h3 className="mt-8 text-xl font-extrabold">{title}</h3><p className="mt-3 text-slate-400">{text}</p></div>)}
-          <div className="card-dark sm:col-span-2 p-6"><h3 className="text-xl font-extrabold text-cyan-300">Teknologi Terdepan</h3><p className="mt-2 text-slate-400">Powered by YOLOv8 Deep Learning</p></div>
-        </section>
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${
+      isDark
+        ? 'bg-gradient-to-br from-[#0a0e1a] via-[#0d1225] to-[#0a0e1a]'
+        : 'bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50'
+    }`}>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px] animate-pulse ${
+          isDark ? 'bg-[#00d4ff]/10' : 'bg-blue-400/20'
+        }`} />
+        <div className={`absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[120px] animate-pulse ${
+          isDark ? 'bg-[#00ff88]/10' : 'bg-green-400/20'
+        }`} style={{ animationDelay: '1s' }} />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[100px] animate-pulse ${
+          isDark ? 'bg-purple-500/10' : 'bg-purple-400/20'
+        }`} style={{ animationDelay: '2s' }} />
       </div>
-    </main>
+
+      {/* Grid pattern overlay */}
+      <div className={`absolute inset-0 ${isDark ? 'opacity-[0.02]' : 'opacity-[0.04]'}`} style={{
+        backgroundImage: isDark
+          ? `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`
+          : `linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)`,
+        backgroundSize: '50px 50px'
+      }} />
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-6xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Hero Content */}
+            <div className={`space-y-8 transition-all duration-1000 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+              {/* Logo */}
+              <div className={`inline-flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-xl border transition-colors ${
+                isDark
+                  ? 'bg-white/5 border-white/10'
+                  : 'bg-white/60 border-gray-200 shadow-sm'
+              }`}>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00d4ff] to-[#0066ff] flex items-center justify-center">
+                  <Radio size={16} className="text-white" strokeWidth={2.5} />
+                </div>
+                <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  TrafficSense AI
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="space-y-4">
+                <h1 className={`text-5xl lg:text-6xl leading-tight transition-colors ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`} style={{ fontWeight: 800 }}>
+                  Smart Traffic
+                  <br />
+                  <span className="bg-gradient-to-r from-[#00d4ff] via-purple-400 to-[#00ff88] bg-clip-text text-transparent">
+                    Monitoring
+                  </span>
+                </h1>
+                <p className={`text-xl leading-relaxed max-w-md transition-colors ${
+                  isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                }`}>
+                  Platform monitoring lalu lintas berbasis AI dengan analitik real-time dan deteksi otomatis
+                </p>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="group relative px-8 py-4 rounded-2xl overflow-hidden"
+                >
+                  {/* Gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00d4ff] to-[#0066ff] transition-transform group-hover:scale-105" />
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00d4ff] to-[#0066ff] blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                  {/* Content */}
+                  <div className="relative flex items-center gap-2 text-white font-bold">
+                    <span>Masuk</span>
+                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/register')}
+                  className={`group px-8 py-4 rounded-2xl backdrop-blur-xl border font-bold transition-all ${
+                    isDark
+                      ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'
+                      : 'bg-white/60 border-gray-200 text-gray-900 hover:bg-white/80 hover:border-gray-300 shadow-sm'
+                  }`}
+                >
+                  Daftar Akun
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-8 pt-4">
+                <div>
+                  <div className={`text-3xl font-bold mb-1 transition-colors ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>24/7</div>
+                  <div className={`text-sm transition-colors ${
+                    isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                  }`}>Monitoring</div>
+                </div>
+                <div>
+                  <div className={`text-3xl font-bold mb-1 transition-colors ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>96.4%</div>
+                  <div className={`text-sm transition-colors ${
+                    isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                  }`}>Akurasi AI</div>
+                </div>
+                <div>
+                  <div className={`text-3xl font-bold mb-1 transition-colors ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>18+</div>
+                  <div className={`text-sm transition-colors ${
+                    isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                  }`}>Kamera Aktif</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Features Grid */}
+            <div className={`space-y-4 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+              <div className="grid grid-cols-2 gap-4">
+                {features.map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className={`group relative backdrop-blur-xl border rounded-3xl p-6 transition-all duration-500 ${feature.delay} animate-fade-in-up ${
+                      isDark
+                        ? 'bg-white/5 border-white/10 hover:bg-white/10'
+                        : 'bg-white/60 border-gray-200 hover:bg-white/80 shadow-sm'
+                    }`}
+                  >
+                    {/* Glow on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-3xl opacity-0 group-hover:opacity-10 blur-xl transition-opacity`} />
+
+                    <div className="relative space-y-3">
+                      {/* Icon */}
+                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                        <feature.icon size={24} className="text-white" strokeWidth={2.5} />
+                      </div>
+
+                      {/* Text */}
+                      <div>
+                        <h3 className={`font-bold mb-1 transition-colors ${
+                          isDark ? 'text-white' : 'text-gray-900'
+                        }`}>{feature.title}</h3>
+                        <p className={`text-sm leading-relaxed transition-colors ${
+                          isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                        }`}>{feature.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Decorative element */}
+              <div className={`relative mt-8 p-6 rounded-3xl backdrop-blur-xl border overflow-hidden transition-colors ${
+                isDark
+                  ? 'bg-white/5 border-white/10'
+                  : 'bg-white/60 border-gray-200 shadow-sm'
+              }`}>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#00d4ff]/20 to-transparent rounded-bl-full" />
+                <div className="relative flex items-center gap-3">
+                  <Sparkles size={24} className="text-[#00d4ff]" />
+                  <div>
+                    <div className={`font-bold mb-1 transition-colors ${
+                      isDark ? 'text-white' : 'text-gray-900'
+                    }`}>Teknologi Terdepan</div>
+                    <div className={`text-sm transition-colors ${
+                      isDark ? 'text-[#8892a4]' : 'text-gray-600'
+                    }`}>Powered by YOLOv8 Deep Learning</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-1000 delay-[800ms] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className="flex flex-col items-center gap-2 animate-bounce">
+          <div className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
+            isDark ? 'text-[#8892a4]' : 'text-gray-500'
+          }`}>Scroll untuk lebih lanjut</div>
+          <div className={`w-6 h-10 rounded-full border-2 flex items-start justify-center p-2 transition-colors ${
+            isDark ? 'border-white/20' : 'border-gray-300'
+          }`}>
+            <div className={`w-1 h-2 rounded-full transition-colors ${
+              isDark ? 'bg-white/40' : 'bg-gray-400'
+            }`} />
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out forwards;
+        }
+      `}</style>
+    </div>
   );
 }
