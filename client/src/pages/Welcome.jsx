@@ -1,54 +1,49 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Radio, Zap, Shield, Eye, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
 
 export default function Welcome() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
-  const { activeTheme } = "dark";
-  const isDark = activeTheme === "dark";
-
+  const isDark = false;
+  
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const features = [
-    {
-      icon: Zap,
-      title: "AI-Powered Detection",
-      desc: "YOLOv8 real-time object detection",
-      color: "from-yellow-400 to-orange-500",
-      delay: "delay-100"
-    },
-    {
-      icon: Shield,
-      title: "Secure Access",
-      desc: "Role-based authentication system",
-      color: "from-[#00d4ff] to-[#0066ff]",
-      delay: "delay-200"
-    },
-    {
-      icon: Eye,
-      title: "Real-time Monitor",
-      desc: "24/7 traffic surveillance",
-      color: "from-purple-400 to-pink-500",
-      delay: "delay-300"
-    },
-    {
-      icon: TrendingUp,
-      title: "Advanced Analytics",
-      desc: "Data-driven insights",
-      color: "from-[#00ff88] to-[#00cc66]",
-      delay: "delay-[400ms]"
-    }
-  ];
+  {
+    icon: Eye,
+    title: "Deteksi Real-time",
+    desc: "Pantau kondisi lalu lintas secara langsung.",
+    color: "from-[#00d4ff] to-[#0066ff]",
+    delay: "delay-0",
+  },
+  {
+    icon: Shield,
+    title: "Keamanan Jalan",
+    desc: "Analisis potensi risiko lalu lintas.",
+    color: "from-[#00ff88] to-[#00aa55]",
+    delay: "delay-100",
+  },
+  {
+    icon: TrendingUp,
+    title: "Analitik Cerdas",
+    desc: "Visualisasi data lalu lintas berbasis AI.",
+    color: "from-purple-500 to-pink-500",
+    delay: "delay-200",
+  },
+  {
+    icon: Zap,
+    title: "Respons Cepat",
+    desc: "Sistem cepat membaca kondisi jalan.",
+    color: "from-orange-500 to-red-500",
+    delay: "delay-300",
+  },
+];
 
   return (
-    <div className={`min-h-screen relative overflow-hidden transition-colors duration-500 ${
-      isDark
-        ? 'bg-gradient-to-br from-[#0a0e1a] via-[#0d1225] to-[#0a0e1a]'
-        : 'bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50'
-    }`}>
+  <div className="app-soft-bg min-h-screen relative overflow-hidden transition-colors duration-500">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px] animate-pulse ${

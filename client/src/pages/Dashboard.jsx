@@ -1,5 +1,6 @@
 import React from 'react';
 import { Activity, AlertTriangle, BarChart3, Camera, Car, CheckCircle, Cpu, MapPin } from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, } from "recharts";
 
 const locations = [
   ['Jl. Sudirman', 342, 'macet', 'bg-rose-500'],
@@ -16,51 +17,144 @@ const detections = [
   ['Jl. HR Rasuna Said', 12, '98.5%', '18:41:42', 'lancar'],
   ['Jl. Gatot Subroto', 28, '93.7%', '18:41:30', 'padat'],
 ];
+const trafficTrendData = [
+  { time: "02:00", lancar: 40, padat: 18, macet: 8 },
+  { time: "04:00", lancar: 38, padat: 12, macet: 5 },
+  { time: "06:00", lancar: 45, padat: 10, macet: 4 },
+  { time: "08:00", lancar: 72, padat: 35, macet: 28 },
+  { time: "10:00", lancar: 48, padat: 66, macet: 14 },
+  { time: "12:00", lancar: 60, padat: 52, macet: 22 },
+  { time: "14:00", lancar: 58, padat: 57, macet: 12 },
+  { time: "16:00", lancar: 70, padat: 45, macet: 30 },
+  { time: "18:00", lancar: 36, padat: 78, macet: 42 },
+  { time: "20:00", lancar: 30, padat: 48, macet: 15 },
+  { time: "22:00", lancar: 80, padat: 25, macet: 8 },
+];
+
+const trafficStatusData = [
+  { name: "Lancar", value: 42, color: "#22c55e" },
+  { name: "Padat", value: 35, color: "#f59e0b" },
+  { name: "Macet", value: 23, color: "#ef4444" },
+];
 
 export default function Dashboard() {
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={<Car />} label="Total Kendaraan" value="12.853" sub="Hari ini" color="text-cyan-300" />
-        <Metric icon={<AlertTriangle />} label="Titik Kemacetan" value="7" sub="Dari 24 lokasi" color="text-rose-400" />
-        <Metric icon={<CheckCircle />} label="Akurasi Model AI" value="96.4%" sub="YOLOv8 Detection" color="text-emerald-400" />
-        <Metric icon={<Camera />} label="Kamera Aktif" value="18/24" sub="6 kamera offline" color="text-violet-400" />
-      </section>
+   <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+  {/* Tren Kepadatan */}
+  <div className="glass-card rounded-3xl p-5 xl:col-span-2">
+    <div className="mb-4 flex items-start justify-between">
+      <div>
+        <h3 className="text-xl font-bold text-slate-900">
+          Tren Kepadatan Lalu Lintas
+        </h3>
+        <p className="text-sm text-slate-500">
+          24 jam terakhir — semua lokasi
+        </p>
+      </div>
 
-      <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-        <Card title="Distribusi Status" subtitle="Saat ini — semua titik">
-          <div className="flex flex-col items-center gap-6 md:flex-row md:justify-center">
-            <div className="h-36 w-36 rounded-full" style={{ background: 'conic-gradient(#00f58d 0 42%, #ffb000 42% 77%, #ff4b63 77% 100%)' }}><div className="relative left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0b1228]" /></div>
-            <div className="w-full space-y-3 text-sm"><Legend color="bg-emerald-400" label="Lancar" value="42%"/><Legend color="bg-amber-400" label="Padat" value="35%"/><Legend color="bg-rose-400" label="Macet" value="23%"/></div>
-          </div>
-        </Card>
-        <Card title="Volume Kendaraan/Jam" subtitle="" action="Dataset">
-          <div className="mt-4 flex h-44 items-end gap-4 border-b border-slate-700/60 px-4">
-            {[880, 1400, 1850, 1320, 970, 860, 1080, 930, 870, 1010, 1460, 1940, 1760].map((v, i) => <div key={i} className="flex flex-1 flex-col items-center gap-2"><div className="w-full max-w-4 rounded-t bg-cyan-400" style={{ height: `${(v / 2000) * 150}px` }} /><span className="text-[10px] text-slate-400">{String(i + 6).padStart(2, '0')}</span></div>)}
-          </div>
-        </Card>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <Card title="Status per Lokasi" icon={<MapPin size={18}/>}> 
-          <div className="space-y-4">
-            {locations.map(([name, count, status, color]) => <div key={name}><div className="mb-2 flex justify-between text-sm"><span>{name}</span><span className="text-slate-400">{count} kend. <Badge status={status}/></span></div><div className="h-2 rounded-full bg-slate-700"><div className={`h-2 rounded-full ${color}`} style={{ width: `${Math.min(count / 4, 92)}%` }} /></div></div>)}
-          </div>
-        </Card>
-        <Card title="Deteksi Terbaru" icon={<Activity size={18}/>}>
-          <div className="space-y-3">
-            {detections.map(([name, count, conf, time, status]) => <div key={name} className="flex items-center justify-between rounded-xl bg-slate-800/70 p-4"><div className="flex items-start gap-3"><span className={`mt-1 h-2.5 w-2.5 rounded-full ${status === 'macet' ? 'bg-rose-500' : status === 'padat' ? 'bg-amber-400' : 'bg-emerald-400'}`} /><div><p className="font-bold">{name}</p><p className="text-sm text-slate-400">{count} kendaraan • {conf} conf</p></div></div><span className="text-sm text-slate-400">{time}</span></div>)}
-          </div>
-        </Card>
-      </section>
-
-      <Card title="Performa Model AI" icon={<Cpu size={18}/>} subtitle="YOLOv8 • Deep Learning">
-        <div className="grid gap-5 md:grid-cols-4">
-          {[['96.4%', 'Precision', 'cyan'], ['94.8%', 'Recall', 'emerald'], ['95.6%', 'F1-Score', 'violet'], ['93.2%', 'mAP@50', 'amber']].map(([value, label, color]) => <Ring key={label} value={value} label={label} color={color} />)}
-        </div>
-      </Card>
+      <button className="rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-sm font-medium text-slate-600">
+        Dataset
+      </button>
     </div>
-  );
+
+    <div className="mb-4 flex flex-wrap gap-4 text-sm font-medium">
+      <div className="flex items-center gap-2 text-slate-600">
+        <span className="h-3 w-3 rounded-full bg-green-500"></span>
+        Lancar
+      </div>
+      <div className="flex items-center gap-2 text-slate-600">
+        <span className="h-3 w-3 rounded-full bg-amber-500"></span>
+        Padat
+      </div>
+      <div className="flex items-center gap-2 text-slate-600">
+        <span className="h-3 w-3 rounded-full bg-red-500"></span>
+        Macet
+      </div>
+    </div>
+
+    <div className="h-[320px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={trafficTrendData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+          <XAxis dataKey="time" stroke="#64748b" />
+          <YAxis stroke="#64748b" />
+          <Tooltip />
+          <Line
+            type="monotone"
+            dataKey="lancar"
+            stroke="#22c55e"
+            strokeWidth={3}
+            dot={{ r: 3 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="padat"
+            stroke="#f59e0b"
+            strokeWidth={3}
+            dot={{ r: 3 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="macet"
+            stroke="#ef4444"
+            strokeWidth={3}
+            dot={{ r: 3 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+
+  {/* Distribusi Status */}
+  <div className="glass-card rounded-3xl p-5">
+    <div className="mb-4">
+      <h3 className="text-xl font-bold text-slate-900">
+        Distribusi Status
+      </h3>
+      <p className="text-sm text-slate-500">
+        Saat ini — semua titik
+      </p>
+    </div>
+
+    <div className="h-[220px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={trafficStatusData}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={55}
+            outerRadius={85}
+            paddingAngle={3}
+          >
+            {trafficStatusData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+
+    <div className="mt-4 space-y-3">
+      {trafficStatusData.map((item) => (
+        <div key={item.name} className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <span
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            ></span>
+            {item.name}
+          </div>
+          <span className="text-sm font-bold text-slate-800">
+            {item.value}%
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+  )
 }
 
 function Metric({ icon, label, value, sub, color }) { return <div className="card-dark p-5"><div className={color}>{icon}</div><p className="mt-4 text-sm text-slate-400">{label}</p><h3 className={`mt-2 text-3xl font-extrabold ${color}`}>{value}</h3><p className="text-sm text-slate-400">{sub}</p></div>; }

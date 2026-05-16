@@ -1,48 +1,9 @@
 @import "tailwindcss";
 
-html,
-body,
-#root {
-  min-height: 100%;
-  margin: 0;
-}
-
-body {
-  background: #f8fafc;
-}
-
-html.dark body {
-  background: #020617;
-}
-@theme {
-  --font-jakarta: "Plus Jakarta Sans", sans-serif;
-}
-
-html { scroll-behavior: smooth; }
-body { margin: 0; font-family: var(--font-jakarta); background: #060b1d; color: white; }
-* { box-sizing: border-box; }
-
-.card-dark { @apply rounded-2xl border border-slate-700/70 bg-[#0b1228] shadow-xl shadow-black/10; }
-.soft-panel { @apply rounded-2xl border border-slate-700/70 bg-[#121b34]; }
-.status-pill { @apply rounded-full border px-3 py-1 text-xs font-bold; }
 :root {
-  --bg-main: #f8fafc;
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --bg-panel: #f1f5f9;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #cbd5e1;
-}
-
-html.dark {
-  --bg-main: #020617;
-  --bg-sidebar: #071126;
-  --bg-card: #0f172a;
-  --bg-panel: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fbff;
 }
 
 html,
@@ -50,9 +11,72 @@ body,
 #root {
   min-height: 100%;
   margin: 0;
-  background: var(--bg-main);
-  color: var(--text-main);
 }
+
 body {
-  @apply transition-colors duration-300;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(0, 212, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 75% 15%, rgba(96, 165, 250, 0.22), transparent 35%),
+    radial-gradient(circle at 85% 75%, rgba(34, 211, 238, 0.16), transparent 32%),
+    linear-gradient(135deg, #f8fbff 0%, #eaf4ff 45%, #f9fbff 100%);
+  background-attachment: fixed;
+  color: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-soft-bg {
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 212, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(147, 197, 253, 0.25), transparent 34%),
+    radial-gradient(circle at 90% 80%, rgba(45, 212, 191, 0.14), transparent 32%),
+    linear-gradient(135deg, #f8fbff 0%, #eaf4ff 48%, #ffffff 100%);
+  overflow-x: hidden;
+}
+
+.app-soft-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 70%);
+}
+
+.app-soft-bg {
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 212, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(147, 197, 253, 0.25), transparent 34%),
+    radial-gradient(circle at 90% 80%, rgba(45, 212, 191, 0.14), transparent 32%),
+    linear-gradient(135deg, #f8fbff 0%, #eaf4ff 48%, #ffffff 100%);
+  overflow-x: hidden;
+}
+
+.app-soft-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 70%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(203, 213, 225, 0.75);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
 }
