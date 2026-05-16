@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext.jsx';
 import {
   Activity,
   BarChart3,
@@ -14,26 +15,20 @@ import {
   Wifi,
 } from 'lucide-react';
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/monitor', label: 'Traffic Monitor', icon: Monitor },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/reports', label: 'Reports', icon: FileText },
-  { to: '/settings', label: 'Settings', icon: Settings },
+const navIcons = [
+  { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
+  { to: '/monitor',   key: 'monitor',   icon: Monitor },
+  { to: '/analytics', key: 'analytics', icon: BarChart3 },
+  { to: '/reports',   key: 'reports',   icon: FileText },
+  { to: '/settings',  key: 'settings',  icon: Settings },
 ];
-
-const titles = {
-  '/dashboard': ['Dashboard', 'Overview sistem deteksi lalu lintas real-time'],
-  '/monitor': ['Traffic Monitor', 'Pemantauan live feed kamera CCTV'],
-  '/analytics': ['Analytics', 'Analisis mendalam data kepadatan lalu lintas'],
-  '/reports': ['Reports', 'Laporan historis dan ringkasan deteksi'],
-  '/settings': ['Settings', 'Konfigurasi sistem dan model AI'],
-  '/profile': ['Profil Pengguna', 'Kelola informasi akun dan akses perangkat Anda'],
-};
 
 export default function AppLayout() {
   const location = useLocation();
-  const [title, subtitle] = titles[location.pathname] || titles['/dashboard'];
+  const { t } = useLanguage();
+
+  const navItems = navIcons.map((n) => ({ ...n, label: t.nav[n.key] }));
+  const [title, subtitle] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
 
  return (
   <div className="app-soft-bg min-h-screen text-slate-900">
@@ -48,9 +43,9 @@ export default function AppLayout() {
         </div>
       </div>
 
-      <div className="px-3 py-4">
+        <div className="px-3 py-4">
         <div className="mb-4 rounded-xl border border-white/70 bg-white/60 px-4 py-2 text-xs font-extrabold text-cyan-700 shadow-sm backdrop-blur-xl">
-          ADMIN ACCESS
+          {t.adminAccess}
         </div>
 
         <nav className="space-y-2">
@@ -80,7 +75,7 @@ export default function AppLayout() {
       <div className="absolute bottom-6 left-3 right-3 rounded-2xl border border-cyan-200/80 bg-white/60 p-4 shadow-sm backdrop-blur-xl">
         <div className="flex items-center gap-2 font-bold text-cyan-700">
           <Activity size={16} />
-          AI Engine Active
+          {t.aiEngine}
         </div>
 
         <div className="mt-3 h-2 rounded-full bg-slate-200">
@@ -107,7 +102,7 @@ export default function AppLayout() {
         <div className="hidden items-center gap-3 xl:flex">
           <span className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-600">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            LIVE
+            {t.live}
             <Wifi size={14} />
           </span>
 
@@ -119,7 +114,7 @@ export default function AppLayout() {
             <Search size={16} />
             <input
               className="bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-              placeholder="Cari lokasi..."
+              placeholder={t.searchPlaceholder}
             />
           </label>
 

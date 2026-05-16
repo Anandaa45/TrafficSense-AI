@@ -10,11 +10,13 @@ import Analytics from './pages/Analytics.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
+import { LanguageProvider } from './context/LanguageContext.jsx';
 import './index.css';
 
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <LanguageProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/welcome" element={<Welcome />} />
@@ -30,5 +32,6 @@ createRoot(document.getElementById('root')).render(
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
+    </LanguageProvider>
   </React.StrictMode>
 );
