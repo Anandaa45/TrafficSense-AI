@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BriefcaseBusiness, Eye, LockKeyhole, Mail, User } from 'lucide-react';
+import { BriefcaseBusiness, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react';
 import AuthShell from '../components/AuthShell.jsx';
 import { api } from '../lib/api.js';
 
@@ -15,9 +15,12 @@ const initialForm = {
 
 export default function Register() {
   const [form, setForm] = useState(initialForm);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -63,10 +66,10 @@ export default function Register() {
           <input className={inputClass} placeholder="Operator Lalu Lintas" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
         </Field>
         <Field label="PASSWORD" icon={<Eye size={18} />}>
-          <input type="password" className={inputClass} placeholder="Min. 8 karakter" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <input type="text" className={inputClass} placeholder="Min. 8 karakter" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         </Field>
         <Field label="KONFIRMASI PASSWORD" icon={<LockKeyhole size={18} />}>
-          <input type="password" className={inputClass} placeholder="Ulangi password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
+          <input type="text" className={inputClass} placeholder="Ulangi password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
         </Field>
 
         {error ? <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p> : null}

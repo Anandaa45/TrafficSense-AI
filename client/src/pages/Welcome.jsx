@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Radio, Zap, Shield, Eye, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
 
-export function Welcome() {
+export default function Welcome() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
-  const { activeTheme } = useTheme();
+  const { activeTheme } = "dark";
   const isDark = activeTheme === "dark";
 
   useEffect(() => {

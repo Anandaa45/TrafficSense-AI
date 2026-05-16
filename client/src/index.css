@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f8fafc;
+}
+
+html.dark body {
+  background: #020617;
+}
 @theme {
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
@@ -11,3 +25,34 @@ body { margin: 0; font-family: var(--font-jakarta); background: #060b1d; color: 
 .card-dark { @apply rounded-2xl border border-slate-700/70 bg-[#0b1228] shadow-xl shadow-black/10; }
 .soft-panel { @apply rounded-2xl border border-slate-700/70 bg-[#121b34]; }
 .status-pill { @apply rounded-full border px-3 py-1 text-xs font-bold; }
+:root {
+  --bg-main: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-panel: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #cbd5e1;
+}
+
+html.dark {
+  --bg-main: #020617;
+  --bg-sidebar: #071126;
+  --bg-card: #0f172a;
+  --bg-panel: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+body {
+  @apply transition-colors duration-300;
+}
