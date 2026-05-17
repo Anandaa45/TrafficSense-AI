@@ -11,27 +11,29 @@ import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
 import { LanguageProvider } from './context/LanguageContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import './index.css';
-
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <LanguageProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/login" element={<Login />} />
-        <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/monitor" element={<TrafficMonitor />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </BrowserRouter>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/welcome" element={<Welcome />} />
+            <Route path="/login"   element={<Login />} />
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/monitor"   element={<TrafficMonitor />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/reports"   element={<Reports />} />
+              <Route path="/settings"  element={<Settings />} />
+              <Route path="/profile"   element={<Profile />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

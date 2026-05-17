@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Bell, Camera, Cpu, Database, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as Gear, Clock, Laptop } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi', 'Sistem', 'Database'];
 
@@ -33,18 +34,16 @@ function useTokens(isDark) {
 
 // ─── Root ──────────────────────────────────────────────────────────────────
 export default function Settings() {
-  const { lang, setLang, t } = useLanguage();
-  const [tab, setTab]             = useState(0);
-  const [themeMode, setThemeMode] = useState('Dark');
+  const { lang, setLang, t }                             = useLanguage();
+  const { themeMode, setThemeMode, activeTheme, isDark } = useTheme();
+  const [tab, setTab]                                    = useState(0);
 
   const autoTheme = useMemo(() => {
     const h = new Date().getHours();
     return h >= 6 && h < 18 ? 'Light' : 'Dark';
   }, []);
 
-  const activeTheme = themeMode === 'System' ? autoTheme : themeMode;
-  const isDark      = activeTheme === 'Dark';
-  const tk          = useTokens(isDark);
+  const tk = useTokens(isDark);
 
   const tabLabels = t.tabs;
 
