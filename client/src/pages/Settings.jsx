@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Bell, Camera, Cpu, Database, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as Gear, Clock, Laptop } from 'lucide-react';
+import { Bell, Camera, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as Gear, Clock, Laptop } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 
-const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi', 'Sistem', 'Database'];
+const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi'];
 
 // ─── Token tema terpusat ───────────────────────────────────────────────────
 function useTokens(isDark) {
@@ -45,7 +45,7 @@ export default function Settings() {
 
   const tk = useTokens(isDark);
 
-  const tabLabels = t.tabs;
+  const tabLabels = t.tabs.slice(0, 4);
 
   return (
     <div className={`min-h-full space-y-5 p-5 transition-colors duration-300 ${tk.page}`}>
@@ -63,8 +63,6 @@ export default function Settings() {
       {tab === 1 && <ModelAI   isDark={isDark} tk={tk} t={t} />}
       {tab === 2 && <Kamera    isDark={isDark} tk={tk} t={t} />}
       {tab === 3 && <Notifikasi isDark={isDark} tk={tk} t={t} />}
-      {tab === 4 && <Sistem     isDark={isDark} tk={tk} t={t} />}
-      {tab === 5 && <DatabaseTab isDark={isDark} tk={tk} t={t} />}
     </div>
   );
 }
@@ -169,54 +167,32 @@ function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, 
 // ─── Tab: Model AI ─────────────────────────────────────────────────────────
 function ModelAI({ isDark, tk, t }) {
   const m = t.modelAI;
-  const [confidence, setConfidence] = useState(0.85);
-  const [iou,        setIou]        = useState(0.45);
-  const [fps,        setFps]        = useState(30);
-  const [batchSize,  setBatchSize]  = useState(16);
-  const [autoRetrain,setAutoRetrain]= useState(true);
 
   return (
     <div className="space-y-5">
-      <Section title={m.sectionTitle} icon={<Cpu size={18} className="text-cyan-400" />} tk={tk}>
-        <div className="grid gap-5 md:grid-cols-2">
-          <SelectField label={m.architecture} tk={tk}>
-            {['YOLOv8n (Nano)','YOLOv8s (Small)','YOLOv8m (Medium)','YOLOv8l (Large)','YOLOv8x (XLarge)'].map(o=><option key={o}>{o}</option>)}
-          </SelectField>
-          <SelectField label={m.device} tk={tk}>
-            {['CUDA (GPU)','CPU','TensorRT'].map(o=><option key={o}>{o}</option>)}
-          </SelectField>
-          <Slider label={m.confidence} value={confidence} min={0.5}  max={0.99} step={0.01} onChange={setConfidence} tk={tk} />
-          <Slider label={m.iou}        value={iou}        min={0.3}  max={0.9}  step={0.01} onChange={setIou}        tk={tk} />
-          <Slider label={m.fps}        value={fps}        min={5}    max={60}   step={5}    onChange={setFps}        tk={tk} />
-          <Slider label={m.batchSize}  value={batchSize}  min={1}    max={32}   step={1}    onChange={setBatchSize}  tk={tk} />
-        </div>
-        <div className={`mt-6 flex items-center justify-between border-t pt-5 ${tk.divider}`}>
-          <div>
-            <p className={`font-bold ${tk.heading}`}>{m.autoRetrain}</p>
-            <p className={`text-sm ${tk.subtext}`}>{m.autoRetrainSub}</p>
-          </div>
-          <Toggle on={autoRetrain} onClick={() => setAutoRetrain(v => !v)} />
-        </div>
-      </Section>
-
       <Section title={m.deteksiTitle} icon={<Gear size={18} className="text-cyan-400" />} tk={tk}>
         <div className="grid gap-3 md:grid-cols-4">
           {[
-            { label:'Motor',        color:'bg-cyan-400',    on:true  },
-            { label:'Mobil',        color:'bg-emerald-400', on:true  },
-            { label:'Bus',          color:'bg-amber-400',   on:true  },
-            { label:'Truk',         color:'bg-violet-400',  on:true  },
-            { label:'Sepeda',       color:'bg-slate-500',   on:false },
-            { label:'Pejalan Kaki', color:'bg-slate-500',   on:false },
-            { label:'Ambulans',     color:'bg-rose-400',    on:true  },
-            { label:'Polisi',       color:'bg-slate-500',   on:false },
+            { label: 'Motor', color: 'bg-cyan-400', on: true },
+            { label: 'Mobil', color: 'bg-emerald-400', on: true },
+            { label: 'Bus', color: 'bg-amber-400', on: true },
+            { label: 'Truk', color: 'bg-violet-400', on: true },
+            { label: 'Sepeda', color: 'bg-slate-500', on: false },
+            { label: 'Pejalan Kaki', color: 'bg-slate-500', on: false },
+            { label: 'Ambulans', color: 'bg-rose-400', on: true },
+            { label: 'Polisi', color: 'bg-slate-500', on: false },
           ].map(({ label, color, on }) => (
-            <button key={label} className={`rounded-xl border px-4 py-3 text-left transition-all ${on ? tk.deteksiOn : tk.deteksiOff}`}>
-              <span className={`mr-2 inline-block h-3 w-3 rounded-full ${color}`} />{label}
+            <button
+              key={label}
+              className={`rounded-xl border px-4 py-3 text-left transition-all ${on ? tk.deteksiOn : tk.deteksiOff}`}
+            >
+              <span className={`mr-2 inline-block h-3 w-3 rounded-full ${color}`} />
+              {label}
             </button>
           ))}
         </div>
       </Section>
+
       <SaveButtons tk={tk} t={t} />
     </div>
   );
@@ -269,32 +245,6 @@ function Notifikasi({ isDark, tk, t }) {
         <Row title={n.alert}  sub={n.alertSub}  on={alerts}     onClick={() => setAlerts(v=>!v)}     tk={tk} />
         <Row title={n.email}  sub={n.emailSub}  on={emailNotif} onClick={() => setEmailNotif(v=>!v)} tk={tk} />
         <Row title={n.sms}    sub={n.smsSub}    on={smsNotif}   onClick={() => setSmsNotif(v=>!v)}   tk={tk} />
-      </div>
-    </Section>
-  );
-}
-
-// ─── Tab: Sistem ───────────────────────────────────────────────────────────
-function Sistem({ isDark, tk, t }) {
-  const s = t.sistem;
-  const values = ['TrafficSense AI v2.4.1','Ubuntu Server 22.04 LTS','NVIDIA RTX 4090 (24GB)','Intel Xeon W-2295 (18 Core)','128 GB DDR4 ECC','14 hari, 7 jam, 23 menit'];
-  return (
-    <Section title={s.sectionTitle} icon={<Monitor size={18} className="text-cyan-400" />} tk={tk}>
-      <div className="grid gap-4 md:grid-cols-2">
-        {s.fields.map((label, i) => <InfoField key={label} label={label} value={values[i]} tk={tk} />)}
-      </div>
-    </Section>
-  );
-}
-
-// ─── Tab: Database ─────────────────────────────────────────────────────────
-function DatabaseTab({ isDark, tk, t }) {
-  const d = t.database;
-  const values = ['PostgreSQL 16.2','db.trafficsense.local','284 GB / 2 TB','18/05/2025 03:00','90 hari','24 koneksi'];
-  return (
-    <Section title={d.sectionTitle} icon={<Database size={18} className="text-cyan-400" />} tk={tk}>
-      <div className="grid gap-4 md:grid-cols-2">
-        {d.fields.map((label, i) => <InfoField key={label} label={label} value={values[i]} tk={tk} />)}
       </div>
     </Section>
   );
