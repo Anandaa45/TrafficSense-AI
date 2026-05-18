@@ -15,6 +15,7 @@ import Profile from './pages/Profile.jsx';
 
 import { LanguageProvider } from './Context/LanguageContext.jsx';
 import { ThemeProvider } from './Context/ThemeContext.jsx';
+import { TimezoneProvider } from './Context/TimezoneContext.jsx';
 
 import './index.css';
 
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <LanguageProvider>
+        <TimezoneProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/welcome" element={<Welcome />} />
@@ -40,6 +42,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
+        </TimezoneProvider>
       </LanguageProvider>
     </ThemeProvider>
   </React.StrictMode>

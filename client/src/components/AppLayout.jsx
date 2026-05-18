@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { useTheme } from '../Context/ThemeContext.jsx';
-import { Activity, BarChart3, FileText, LayoutDashboard, Menu, Monitor, Settings, } from 'lucide-react';
+import { useTimezone } from '../Context/TimezoneContext.jsx';
+import { Activity, BarChart3, FileText, LayoutDashboard, Menu, Monitor, Settings, Clock } from 'lucide-react';
 
 const navIcons = [
   { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
@@ -16,6 +17,23 @@ export default function AppLayout() {
   const location  = useLocation();
   const { t }     = useLanguage();
   const { isDark } = useTheme();
+  const { currentTZ } = useTimezone();
+
+  // ── Jam realtime ──────────────────────────────────────────────────────────
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Format jam sesuai zona waktu yang dipilih
+  const timeString = now.toLocaleTimeString('id-ID', {
+    timeZone: currentTZ.iana,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
 
   const navItems = navIcons.map((n) => ({ ...n, label: t.nav[n.key] }));
   const [title] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
@@ -106,6 +124,34 @@ export default function AppLayout() {
   </div>
 
   <div className="hidden items-center gap-3 xl:flex">
+    {/* ── Jam Realtime + Label Sistem ── */}
+    <div className={`flex items-center gap-3 rounded-xl border px-4 py-2 transition-colors ${isDark ? 'border-cyan-800/50 bg-slate-800/60' : 'border-cyan-200/80 bg-white/60'}`}>
+      {/* Label sistem */}
+      <div className="text-right">
+        <p className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          Sistem Deteksi Kepadatan
+        </p>
+        <p className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          Lalu Lintas
+        </p>
+      </div>
+      {/* Divider */}
+      <div className={`h-8 w-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
+      {/* Jam */}
+      <div className="flex items-center gap-2">
+        <Clock size={14} className="text-cyan-400 flex-shrink-0" />
+        <div>
+          <p className={`font-mono text-base font-extrabold leading-tight tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            {timeString}
+          </p>
+          <p className={`text-[10px] font-bold text-cyan-400 leading-tight`}>
+            {currentTZ.value} UTC+{currentTZ.offsetHours}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Avatar */}
     <NavLink
       to="/profile"
       className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
