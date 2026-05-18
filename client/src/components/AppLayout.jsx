@@ -2,19 +2,7 @@ import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { useTheme } from '../Context/ThemeContext.jsx';
-import {
-  Activity, 
-  BarChart3, 
-  Bell, 
-  FileText, 
-  LayoutDashboard,
-  Menu, 
-  Monitor, 
-  RefreshCw, 
-  Search, 
-  Settings, 
-  Wifi,
-} from 'lucide-react';
+import { Activity, BarChart3, FileText, LayoutDashboard, Menu, Monitor, Settings, } from 'lucide-react';
 
 const navIcons = [
   { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
@@ -30,7 +18,7 @@ export default function AppLayout() {
   const { isDark } = useTheme();
 
   const navItems = navIcons.map((n) => ({ ...n, label: t.nav[n.key] }));
-  const [title, subtitle] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
+  const [title] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
   const bg       = isDark ? 'bg-[#060d1f]'                                 : 'app-soft-bg';
@@ -50,11 +38,7 @@ export default function AppLayout() {
   const aiBar    = isDark ? 'bg-slate-700'                                   : 'bg-slate-200';
   const aiSub    = isDark ? 'text-slate-500'                                 : 'text-slate-500';
   const titleClr = isDark ? 'text-white'                                    : 'text-slate-950';
-  const subClr   = isDark ? 'text-slate-400'                                : 'text-slate-500';
-  const chipBase = isDark ? 'border-slate-700/60 bg-slate-800/50 text-slate-300' : 'border-white/70 bg-white/60 text-slate-600';
-  const searchCl = isDark ? 'text-slate-300 placeholder:text-slate-500'     : 'text-slate-700 placeholder:text-slate-400';
   const iconBtn  = isDark ? 'text-slate-400 hover:text-white'               : 'text-slate-500 hover:text-slate-950';
-  const bellBox  = isDark ? 'border-slate-700/60 bg-slate-800/50'           : 'border-white/70 bg-white/60';
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#060d1f] text-white' : 'text-slate-900'} ${!isDark ? 'app-soft-bg' : ''}`}>
@@ -109,48 +93,27 @@ export default function AppLayout() {
       {/* ── Main ── */}
       <div className="lg:pl-[255px]">
         {/* Header */}
-        <header className={`sticky top-0 z-20 flex min-h-[72px] items-center justify-between border-b px-4 shadow-sm backdrop-blur-2xl md:px-8 transition-colors duration-300 ${header}`}>
-          <div className="flex items-center gap-5">
-            <button className={`rounded-lg p-2 transition-colors ${iconBtn} hover:bg-white/10`}>
-              <Menu size={20} />
-            </button>
-            <div>
-              <h2 className={`text-2xl font-extrabold ${titleClr}`}>{title}</h2>
-              <p className={`text-sm ${subClr}`}>{subtitle}</p>
-            </div>
-          </div>
+       {/* Header */}
+<header className={`sticky top-0 z-20 flex min-h-[72px] items-center justify-between border-b px-4 shadow-sm backdrop-blur-2xl md:px-8 transition-colors duration-300 ${header}`}>
+  <div className="flex items-center gap-5">
+    <button className={`rounded-lg p-2 transition-colors ${iconBtn} hover:bg-white/10`}>
+      <Menu size={20} />
+    </button>
 
-          <div className="hidden items-center gap-3 xl:flex">
-            <span className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-600">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              {t.live}
-              <Wifi size={14} />
-            </span>
+    <div>
+      <h2 className={`text-2xl font-extrabold ${titleClr}`}>{title}</h2>
+    </div>
+  </div>
 
-            <span className={`rounded-xl border px-4 py-2 text-sm shadow-sm backdrop-blur-xl ${chipBase}`}>
-              00.28.10
-            </span>
-
-            <label className={`flex items-center gap-2 rounded-xl border px-4 py-2 shadow-sm backdrop-blur-xl ${chipBase}`}>
-              <Search size={16} className="opacity-60" />
-              <input className={`bg-transparent text-sm outline-none ${searchCl}`} placeholder={t.searchPlaceholder} />
-            </label>
-
-            <button className={`rounded-xl border p-2 shadow-sm backdrop-blur-xl transition-colors ${chipBase} ${iconBtn}`}>
-              <RefreshCw size={18} />
-            </button>
-
-            <div className={`relative rounded-xl border p-2 shadow-sm backdrop-blur-xl ${bellBox}`}>
-              <Bell size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-              <span className="absolute -right-2 -top-2 rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">2</span>
-            </div>
-
-            <NavLink to="/profile"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20">
-              L
-            </NavLink>
-          </div>
-        </header>
+  <div className="hidden items-center gap-3 xl:flex">
+    <NavLink
+      to="/profile"
+      className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
+    >
+      L
+    </NavLink>
+  </div>
+</header>
 
         <main className="relative z-10 p-4 md:p-6">
           <Outlet />
