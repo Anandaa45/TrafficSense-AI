@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useLanguage } from './Context/LanguageContext.jsx';
-import { useTheme } from './Context/ThemeContext.jsx';
+import { useLanguage } from '../Context/LanguageContext.jsx';
+import { useTheme } from '../Context/ThemeContext.jsx';
 import {
   Activity, 
   BarChart3, 

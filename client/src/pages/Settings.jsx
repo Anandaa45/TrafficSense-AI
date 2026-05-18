@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Bell, Camera, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as Gear, Clock, Laptop } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext.jsx';
-import { useTheme } from '../context/ThemeContext.jsx';
+import { useLanguage } from '../Context/LanguageContext.jsx';
+import { useTheme } from '../Context/ThemeContext.jsx';
 
 const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi'];
 
