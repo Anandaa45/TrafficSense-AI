@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/AppLayout.jsx';
 import Welcome from './pages/Welcome.jsx';
 import Login from './pages/Login.jsx';
+import Register from "./pages/Register";
 import Dashboard from './pages/Dashboard.jsx';
 import TrafficMonitor from './pages/TrafficMonitor.jsx';
 import Analytics from './pages/Analytics.jsx';
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/monitor" element={<TrafficMonitor />} />
