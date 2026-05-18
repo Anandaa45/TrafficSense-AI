@@ -13,8 +13,8 @@ import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
 
-import { LanguageProvider } from './context/LanguageContext.jsx';
-import { ThemeProvider } from './context/ThemeContext.jsx';
+import { LanguageProvider } from './Context/LanguageContext.jsx';
+import { ThemeProvider } from './Context/ThemeContext.jsx';
 
 import './index.css';
 
