@@ -1,8 +1,13 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BriefcaseBusiness, Eye, EyeOff, LockKeyhole, Mail, User } from 'lucide-react';
-import AuthShell from '../components/AuthShell.jsx';
+import {
+  Activity,
+  BriefcaseBusiness,
+  Eye,
+  EyeOff,
+  Mail,
+  User,
+} from 'lucide-react';
 import { api } from '../lib/api.js';
 
 const initialForm = {
@@ -19,8 +24,15 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
-  
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,64 +45,182 @@ export default function Register() {
 
     try {
       setLoading(true);
+
       await api.post('/auth/register', {
         username: form.username,
         email: form.email,
         role: form.role,
         password: form.password,
       });
+
       navigate('/login');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Register gagal. Coba lagi.');
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass = 'w-full rounded-[18px] border border-white/10 bg-[#07122f] px-4 py-4 pr-11 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/60';
-
   return (
-    <AuthShell
-      title="Buat Akun Baru"
-      subtitle="Bergabung dengan TrafficSense AI Platform"
-      footer={<>Sudah punya akun? <Link to="/login" className="font-bold text-cyan-300">Masuk sekarang</Link></>}
-    >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Field label="USERNAME" icon={<User size={18} />}>
-          <input className={inputClass} placeholder="john_doe" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
-        </Field>
-        <Field label="EMAIL INSTANSI" icon={<Mail size={18} />}>
-          <input className={inputClass} placeholder="nama@dishub.go.id" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        </Field>
-        <Field label="JABATAN / ROLE (OPSIONAL)" icon={<BriefcaseBusiness size={18} />}>
-          <input className={inputClass} placeholder="Operator Lalu Lintas" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
-        </Field>
-        <Field label="PASSWORD" icon={<Eye size={18} />}>
-          <input type="text" className={inputClass} placeholder="Min. 8 karakter" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        </Field>
-        <Field label="KONFIRMASI PASSWORD" icon={<LockKeyhole size={18} />}>
-          <input type="text" className={inputClass} placeholder="Ulangi password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
-        </Field>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-cyan-50 via-slate-100 to-blue-50 px-4 py-10 text-slate-900">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-2xl shadow-slate-300/50 backdrop-blur-xl"
+      >
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
+          <Activity size={30} />
+        </div>
 
-        {error ? <p className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p> : null}
+        <h1 className="text-center text-3xl font-extrabold text-slate-950">
+          Buat Akun Baru
+        </h1>
 
-        <button disabled={loading} className="w-full rounded-[18px] bg-gradient-to-r from-cyan-400 to-blue-600 px-6 py-4 text-lg font-extrabold text-white shadow-lg shadow-cyan-500/20 disabled:opacity-60">
-          {loading ? 'Memproses...' : 'Daftar Akun'}
-        </button>
+        <p className="mt-2 text-center text-sm text-slate-500">
+          Bergabung dengan TrafficSense AI Platform
+        </p>
+
+        <div className="mt-8 space-y-5">
+          <InputField
+            label="USERNAME"
+            icon={<User size={18} />}
+            placeholder="john_doe"
+            value={form.username}
+            onChange={(value) => handleChange('username', value)}
+            required
+          />
+
+          <InputField
+            label="EMAIL INSTANSI"
+            icon={<Mail size={18} />}
+            type="email"
+            placeholder="nama@dishub.go.id"
+            value={form.email}
+            onChange={(value) => handleChange('email', value)}
+            required
+          />
+
+          <InputField
+            label="JABATAN / ROLE (OPSIONAL)"
+            icon={<BriefcaseBusiness size={18} />}
+            placeholder="Operator Lalu Lintas"
+            value={form.role}
+            onChange={(value) => handleChange('role', value)}
+          />
+
+          <PasswordField
+            label="PASSWORD"
+            placeholder="Min. 8 karakter"
+            value={form.password}
+            onChange={(value) => handleChange('password', value)}
+            show={showPassword}
+            onToggle={() => setShowPassword((prev) => !prev)}
+          />
+
+          <PasswordField
+            label="KONFIRMASI PASSWORD"
+            placeholder="Ulangi password"
+            value={form.confirmPassword}
+            onChange={(value) => handleChange('confirmPassword', value)}
+            show={showConfirmPassword}
+            onToggle={() => setShowConfirmPassword((prev) => !prev)}
+          />
+
+          {error ? (
+            <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
+              {error}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 px-6 py-4 text-lg font-extrabold text-white shadow-lg shadow-cyan-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Memproses...' : 'Daftar Akun'}
+          </button>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Sudah punya akun?{' '}
+          <Link
+            to="/login"
+            className="font-bold text-cyan-600 transition hover:text-cyan-500"
+          >
+            Masuk sekarang
+          </Link>
+        </p>
       </form>
-    </AuthShell>
+    </main>
   );
 }
 
-function Field({ label, icon, children }) {
+function InputField({
+  label,
+  icon,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  required = false,
+}) {
   return (
     <label className="block">
-      <span className="mb-3 block text-sm uppercase tracking-wide text-slate-300">{label}</span>
-      <div className="relative text-slate-500">
-        {children}
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">{icon}</span>
+      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">
+        {label}
+      </span>
+
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-500 shadow-sm transition focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
+        <input
+          type={type}
+          required={required}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
+        />
+
+        <span className="text-slate-400">
+          {icon}
+        </span>
       </div>
     </label>
   );
 }
 
+function PasswordField({
+  label,
+  placeholder,
+  value,
+  onChange,
+  show,
+  onToggle,
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">
+        {label}
+      </span>
+
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-500 shadow-sm transition focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
+        <input
+          type={show ? 'text' : 'password'}
+          required
+          minLength={8}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
+        />
+
+        <button
+          type="button"
+          onClick={onToggle}
+          className="text-slate-400 transition hover:text-cyan-500"
+          aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
+        >
+          {show ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </label>
+  );
+}
