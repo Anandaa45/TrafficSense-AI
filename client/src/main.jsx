@@ -11,8 +11,9 @@ import Analytics from './pages/Analytics.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
+import { LanguageProvider } from './context/LanguageContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import './index.css';
-
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -20,7 +21,6 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/monitor" element={<TrafficMonitor />} />
