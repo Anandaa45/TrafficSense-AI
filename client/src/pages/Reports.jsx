@@ -1,3 +1,4 @@
+import { useLanguage } from '../Context/LanguageContext.jsx';
 import React from 'react';
 import {
   AlertTriangle,
@@ -9,6 +10,8 @@ import { useTheme } from '../Context/ThemeContext.jsx';
 
 export default function Reports() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const r = t.reportsPage || {};
 
   const cardClass = isDark
     ? 'bg-[#0b1228] border border-slate-700 text-white'
@@ -47,7 +50,7 @@ export default function Reports() {
         <div className={`flex items-center justify-between border-b p-5 ${lineClass}`}>
           <h3 className={`flex items-center gap-2 text-xl font-extrabold ${titleText}`}>
             <AlertTriangle size={18} className="text-rose-500" />
-            Insiden Hari Ini
+            {r.todayIncidents}
           </h3>
 
           <span className={`text-sm ${mutedText}`}>

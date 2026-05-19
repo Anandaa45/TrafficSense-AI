@@ -1,9 +1,11 @@
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
 import { useTheme } from '../Context/ThemeContext.jsx';
-
+import { useLanguage } from '../Context/LanguageContext.jsx';
 export default function Analytics() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const a = t.analyticsPage || {};
 
   const cardClass = isDark
     ? 'bg-[#0b1228] border border-slate-700 text-white'
@@ -50,7 +52,7 @@ export default function Analytics() {
       {/* Jenis Kendaraan */}
       <section className={`rounded-2xl p-6 transition-colors ${cardClass}`}>
         <h3 className={`text-xl font-extrabold ${titleText}`}>
-          Jenis Kendaraan
+          {a.vehicleTypesTitle}
         </h3>
 
         <p className={`mt-1 text-sm ${mutedText}`}>

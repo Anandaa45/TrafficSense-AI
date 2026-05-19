@@ -129,10 +129,10 @@ export default function AppLayout() {
       {/* Label sistem */}
       <div className="text-right">
         <p className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Sistem Deteksi Kepadatan
+          {t.systemLabel1}
         </p>
         <p className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Lalu Lintas
+          {t.systemLabel2}
         </p>
       </div>
       {/* Divider */}

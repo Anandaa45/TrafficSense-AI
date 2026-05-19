@@ -1,3 +1,4 @@
+import { useLanguage } from '../Context/LanguageContext.jsx';
 import React from 'react';
 import {
   ResponsiveContainer,
@@ -27,14 +28,16 @@ const trafficTrendData = [
   { time: '22:00', lancar: 80, padat: 25, macet: 8 },
 ];
 
-const trafficStatusData = [
-  { name: 'Lancar', value: 42, color: '#22c55e' },
-  { name: 'Padat', value: 35, color: '#f59e0b' },
-  { name: 'Macet', value: 23, color: '#ef4444' },
-];
-
 export default function Dashboard() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const d = t.dashboardPage;
+
+  const trafficStatusData = [
+  { name: d.smooth, value: 42, color: '#22c55e' },
+  { name: d.dense, value: 35, color: '#f59e0b' },
+  { name: d.jammed, value: 23, color: '#ef4444' },
+];
 
   const cardClass = isDark
     ? 'bg-[#0b1228] border border-slate-700 text-white'
@@ -61,11 +64,11 @@ export default function Dashboard() {
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h3 className={`text-xl font-bold ${titleText}`}>
-              Tren Kepadatan Lalu Lintas
+              {d.trafficTrendTitle}
             </h3>
 
             <p className={`mt-1 text-sm ${mutedText}`}>
-              24 jam terakhir — semua lokasi
+              {d.trafficTrendSub}
             </p>
           </div>
 
@@ -76,14 +79,14 @@ export default function Dashboard() {
                 : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            Dataset
+            {d.dataset}
           </button>
         </div>
 
         <div className="mb-4 flex flex-wrap gap-4 text-sm font-medium">
-          <LegendDot color="bg-green-500" label="Lancar" textClass={bodyText} />
-          <LegendDot color="bg-amber-500" label="Padat" textClass={bodyText} />
-          <LegendDot color="bg-red-500" label="Macet" textClass={bodyText} />
+          <LegendDot color="bg-green-500" label={d.smooth} textClass={bodyText} />
+          <LegendDot color="bg-amber-500" label={d.dense} textClass={bodyText} />
+          <LegendDot color="bg-red-500" label={d.jammed} textClass={bodyText} />
         </div>
 
         <div className={`h-[340px] rounded-2xl p-4 ${chartBoxClass}`}>
@@ -141,11 +144,11 @@ export default function Dashboard() {
       <section className={`rounded-3xl p-5 transition-colors ${cardClass}`}>
         <div className="mb-4">
           <h3 className={`text-xl font-bold ${titleText}`}>
-            Distribusi Status
+            {d.statusDistribution}
           </h3>
 
           <p className={`mt-1 text-sm ${mutedText}`}>
-            Saat ini — semua titik
+            {d.currentAllPoints}
           </p>
         </div>
 
