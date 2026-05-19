@@ -3,7 +3,8 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { useTheme } from '../Context/ThemeContext.jsx';
 import { useTimezone } from '../Context/TimezoneContext.jsx';
-import { Activity, BarChart3, FileText, LayoutDashboard, Menu, Monitor, Settings, Clock } from 'lucide-react';
+import { useDateFormat } from '../Context/DateFormatContext.jsx';
+import { Activity, BarChart3, FileText, LayoutDashboard, Menu, Monitor, Settings, Clock , CalendarDays } from 'lucide-react';
 
 const navIcons = [
   { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
@@ -15,9 +16,10 @@ const navIcons = [
 
 export default function AppLayout() {
   const location  = useLocation();
-  const { t }     = useLanguage();
+  const { t, lang } = useLanguage();
   const { isDark } = useTheme();
   const { currentTZ } = useTimezone();
+  const { dateFormat } = useDateFormat();
 
   // ── Jam realtime ──────────────────────────────────────────────────────────
   const [now, setNow] = useState(() => new Date());
@@ -34,6 +36,11 @@ export default function AppLayout() {
     second: '2-digit',
     hour12: false,
   });
+  const dateString = formatAppDate(now, currentTZ.iana, dateFormat);
+  const dayString = new Intl.DateTimeFormat(
+    lang === 'id' ? 'id-ID' : 'en-US',
+    {weekday: 'long', timeZone: currentTZ.iana, }
+).format(now);
 
   const navItems = navIcons.map((n) => ({ ...n, label: t.nav[n.key] }));
   const [title] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
@@ -57,6 +64,28 @@ export default function AppLayout() {
   const aiSub    = isDark ? 'text-slate-500'                                 : 'text-slate-500';
   const titleClr = isDark ? 'text-white'                                    : 'text-slate-950';
   const iconBtn  = isDark ? 'text-slate-400 hover:text-white'               : 'text-slate-500 hover:text-slate-950';
+
+
+  // -- Tanggal Format
+  function formatAppDate(date, timeZone, format) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+
+  const get = (type) => parts.find((p) => p.type === type)?.value;
+
+  const day = get('day');
+  const month = get('month');
+  const year = get('year');
+
+  if (format === 'MM/DD/YYYY') return `${month}/${day}/${year}`;
+  if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
+
+  return `${day}/${month}/${year}`;
+}
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#060d1f] text-white' : 'text-slate-900'} ${!isDark ? 'app-soft-bg' : ''}`}>
@@ -138,7 +167,21 @@ export default function AppLayout() {
       {/* Divider */}
       <div className={`h-8 w-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
       {/* Jam */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2"> 
+        {/* Tanggal */}
+<div className="flex items-center gap-2">
+  <CalendarDays size={14} className="text-cyan-400 flex-shrink-0" />
+  <div>
+    <p className={`font-mono text-base font-extrabold leading-tight tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>
+      {dateString}
+    </p>
+    <p className="text-[10px] font-bold uppercase text-cyan-400 leading-tight">
+      {dayString}
+    </p>
+  </div>
+</div>
+
+<div className={`h-8 w-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
         <Clock size={14} className="text-cyan-400 flex-shrink-0" />
         <div>
           <p className={`font-mono text-base font-extrabold leading-tight tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>

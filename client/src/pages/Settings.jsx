@@ -3,6 +3,7 @@ import { Bell, Camera, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as G
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { useTheme } from '../Context/ThemeContext.jsx';
 import { useTimezone, TIMEZONE_OPTIONS } from '../Context/TimezoneContext.jsx';
+import { useDateFormat, DATE_FORMAT_OPTIONS } from '../Context/DateFormatContext.jsx';
 
 const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi'];
 
@@ -38,6 +39,7 @@ export default function Settings() {
   const { lang, setLang, t }                             = useLanguage();
   const { themeMode, setThemeMode, activeTheme, isDark } = useTheme();
   const { timezone, setTimezone }                        = useTimezone();
+  const { dateFormat, setDateFormat }                    = useDateFormat();
   const [tab, setTab]                                    = useState(0);
 
   const autoTheme = useMemo(() => {
@@ -80,7 +82,8 @@ function Section({ title, icon, children, tk }) {
 }
 
 // ─── Tab: Akun ─────────────────────────────────────────────────────────────
-function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, lang, setLang, timezone, setTimezone }) {
+function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, lang, setLang, timezone, setTimezone, dateFormat, setDateFormat }) {
+  
   const a = t.akun;
   const themeOptions = [
     ['Dark',   Moon,   a.dark,   a.darkSub  ],
@@ -148,11 +151,23 @@ function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, 
             </select>
           </div>
 
-          <SelectField label={a.dateFormat} tk={tk}>
-            <option>DD/MM/YYYY (12/05/2026)</option>
-            <option>MM/DD/YYYY (05/12/2026)</option>
-            <option>YYYY-MM-DD (2026-05-12)</option>
-          </SelectField>
+          <div>
+            <p className={`mb-2 flex items-center gap-1.5 text-sm ${tk.subtext}`}>
+              {a.dateFormat}
+            </p>
+            
+          <select
+          value={dateFormat}
+          onChange={(e) => setDateFormat(e.target.value)}
+          className={`w-full rounded-xl border px-4 py-3 font-semibold outline-none transition-colors focus:ring-1 focus:ring-cyan-400 ${tk.input}`}
+        >
+          {DATE_FORMAT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+         </select>
+         </div>
         </div>
       </Section>
 
