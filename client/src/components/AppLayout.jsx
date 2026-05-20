@@ -105,12 +105,22 @@ export default function AppLayout() {
     ? 'border-cyan-800/50 bg-slate-800/60 text-cyan-400'
     : 'border-cyan-200/80 bg-white/60 text-cyan-700';
 
-  const aiBar = isDark ? 'bg-slate-700' : 'bg-slate-200';
-  const aiSub = isDark ? 'text-slate-500' : 'text-slate-500';
-  const titleClr = isDark ? 'text-white' : 'text-slate-950';
+  const titleClr = isDark
+    ? 'text-white'
+    : 'text-slate-950';
+
   const iconBtn = isDark
     ? 'text-slate-400 hover:text-white'
     : 'text-slate-500 hover:text-slate-950';
+
+  const aiBar = isDark
+    ? 'bg-slate-700'
+    : 'bg-slate-200';
+
+  const aiSub = isDark
+    ? 'text-slate-400'
+    : 'text-slate-500';
+
 
   return (
     <div

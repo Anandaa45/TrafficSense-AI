@@ -63,7 +63,7 @@ export default function Settings() {
         ))}
       </div>
 
-      {tab === 0 && <Akun themeMode={themeMode} setThemeMode={setThemeMode} autoTheme={autoTheme} activeTheme={activeTheme} isDark={isDark} tk={tk} t={t} lang={lang} setLang={setLang} timezone={timezone} setTimezone={setTimezone} />}
+      {tab === 0 && <Akun themeMode={themeMode} setThemeMode={setThemeMode} autoTheme={autoTheme} activeTheme={activeTheme} isDark={isDark} tk={tk} t={t} lang={lang} setLang={setLang} timezone={timezone} setTimezone={setTimezone} dateFormat={dateFormat} setDateFormat={setDateFormat}/>}
       {tab === 1 && <ModelAI   isDark={isDark} tk={tk} t={t} />}
       {tab === 2 && <Kamera    isDark={isDark} tk={tk} t={t} />}
       {tab === 3 && <Notifikasi isDark={isDark} tk={tk} t={t} />}
