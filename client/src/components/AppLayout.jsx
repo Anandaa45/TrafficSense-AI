@@ -221,108 +221,100 @@ export default function AppLayout() {
         }`}
       >
         {/* Header */}
-        <header
-          className={`sticky top-0 z-20 flex min-h-[72px] items-center justify-between border-b px-4 shadow-sm backdrop-blur-2xl transition-colors duration-300 md:px-8 ${header}`}
+       <header
+  className={`sticky top-0 z-20 flex min-h-[72px] items-center justify-between gap-3 overflow-x-auto border-b px-4 shadow-sm backdrop-blur-2xl md:px-8 transition-colors duration-300 ${header}`}
+>
+  <div className="flex min-w-0 items-center gap-4">
+    <button
+      type="button"
+      onClick={() => setSidebarOpen((prev) => !prev)}
+      className={`shrink-0 rounded-lg p-2 transition-colors ${iconBtn} hover:bg-white/10`}
+    >
+      <Menu size={20} />
+    </button>
+
+    <div className="min-w-0">
+      <h2 className={`truncate text-2xl font-extrabold ${titleClr}`}>
+        {title}
+      </h2>
+    </div>
+  </div>
+
+  <div className="flex shrink-0 items-center gap-2">
+    {/* Jam Realtime + Label Sistem */}
+    <div
+      className={`flex scale-[0.78] origin-right items-center gap-3 rounded-xl border px-4 py-2 transition-colors sm:scale-100 ${
+        isDark
+          ? 'border-cyan-800/50 bg-slate-800/60'
+          : 'border-cyan-200/80 bg-white/60'
+      }`}
+    >
+      {/* Label sistem */}
+      <div className="text-right">
+        <p
+          className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${
+            isDark ? 'text-slate-400' : 'text-slate-500'
+          }`}
         >
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen((prev) => !prev)}
-              className={`rounded-lg p-2 transition-colors ${iconBtn} hover:bg-white/10`}
-            >
-              <Menu size={20} />
-            </button>
+          {t.systemLabel1}
+        </p>
+        <p
+          className={`text-[10px] font-semibold uppercase tracking-widest leading-tight ${
+            isDark ? 'text-slate-400' : 'text-slate-500'
+          }`}
+        >
+          {t.systemLabel2}
+        </p>
+      </div>
 
-            <div>
-              <h2 className={`text-2xl font-extrabold ${titleClr}`}>
-                {title}
-              </h2>
-            </div>
-          </div>
+      <div className={`h-8 w-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
 
-          <div className="hidden items-center gap-3 xl:flex">
-            <div
-              className={`flex items-center gap-3 rounded-xl border px-4 py-2 transition-colors ${
-                isDark
-                  ? 'border-cyan-800/50 bg-slate-800/60'
-                  : 'border-cyan-200/80 bg-white/60'
-              }`}
-            >
-              <div className="text-right">
-                <p
-                  className={`text-[10px] font-semibold uppercase leading-tight tracking-widest ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
-                  }`}
-                >
-                  {t.systemLabel1}
-                </p>
-                <p
-                  className={`text-[10px] font-semibold uppercase leading-tight tracking-widest ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
-                  }`}
-                >
-                  {t.systemLabel2}
-                </p>
-              </div>
+      {/* Tanggal */}
+      <div className="flex items-center gap-2">
+        <CalendarDays size={14} className="flex-shrink-0 text-cyan-400" />
+        <div>
+          <p
+            className={`font-mono text-base font-extrabold leading-tight tabular-nums ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
+            {dateString}
+          </p>
+          <p className="text-[10px] font-bold uppercase leading-tight text-cyan-400">
+            {dayString}
+          </p>
+        </div>
+      </div>
 
-              <div
-                className={`h-8 w-px ${
-                  isDark ? 'bg-slate-600' : 'bg-slate-300'
-                }`}
-              />
+      <div className={`h-8 w-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
 
-              <div className="flex items-center gap-2">
-                <CalendarDays
-                  size={14}
-                  className="flex-shrink-0 text-cyan-400"
-                />
+      {/* Jam */}
+      <div className="flex items-center gap-2">
+        <Clock size={14} className="flex-shrink-0 text-cyan-400" />
+        <div>
+          <p
+            className={`font-mono text-base font-extrabold leading-tight tabular-nums ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
+            {timeString}
+          </p>
+          <p className="text-[10px] font-bold leading-tight text-cyan-400">
+            {currentTZ.value} UTC+{currentTZ.offsetHours}
+          </p>
+        </div>
+      </div>
+    </div>
 
-                <div>
-                  <p
-                    className={`font-mono text-base font-extrabold leading-tight tabular-nums ${
-                      isDark ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {dateString}
-                  </p>
-                  <p className="text-[10px] font-bold uppercase leading-tight text-cyan-400">
-                    {dayString}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`h-8 w-px ${
-                  isDark ? 'bg-slate-600' : 'bg-slate-300'
-                }`}
-              />
-
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="flex-shrink-0 text-cyan-400" />
-
-                <div>
-                  <p
-                    className={`font-mono text-base font-extrabold leading-tight tabular-nums ${
-                      isDark ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {timeString}
-                  </p>
-                  <p className="text-[10px] font-bold leading-tight text-cyan-400">
-                    {currentTZ.value} UTC+{currentTZ.offsetHours}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <NavLink
-              to="/profile"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
-            >
-              L
-            </NavLink>
-          </div>
-        </header>
+    {/* Avatar */}
+    <NavLink
+      to="/profile"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
+    >
+      L
+    </NavLink>
+  </div>
+</header>
 
         <main className="relative z-10 p-4 md:p-6">
           <Outlet />
