@@ -18,7 +18,7 @@ export default function AppLayout() {
   const { isDark } = useTheme();
 
   const navItems = navIcons.map((n) => ({ ...n, label: t.nav[n.key] }));
-  const [title] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
+  const [title, subtitle] = t.subtitle[location.pathname] || t.subtitle['/dashboard'];
 
   // ── Theme tokens ──────────────────────────────────────────────────────────
   const bg       = isDark ? 'bg-[#060d1f]'                                 : 'app-soft-bg';
