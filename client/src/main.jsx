@@ -15,6 +15,8 @@ import Profile from './pages/Profile.jsx';
 
 import { LanguageProvider } from './Context/LanguageContext.jsx';
 import { ThemeProvider } from './Context/ThemeContext.jsx';
+import { TimezoneProvider } from './Context/TimezoneContext.jsx';
+import { DateFormatProvider } from './Context/DateFormatContext.jsx';
 
 import './index.css';
 
@@ -22,11 +24,14 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <LanguageProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/welcome" element={<Welcome />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+        <TimezoneProvider>
+          <DateFormatProvider>
+            <BrowserRouter>
+            
+            <Routes>
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -38,8 +43,10 @@ createRoot(document.getElementById('root')).render(
             </Route>
 
             <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+           </BrowserRouter>
+          </DateFormatProvider>
+        </TimezoneProvider>
       </LanguageProvider>
     </ThemeProvider>
   </React.StrictMode>

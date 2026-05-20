@@ -2,6 +2,7 @@ import React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCcw, Search, Volume2, Expand, MapPin, Plus, Trash2, X, Check } from 'lucide-react';
 import { api } from '../lib/api.js';
+import { useLanguage } from '../Context/LanguageContext.jsx';
 
 // Daftar kamera tambahan yang bisa ditambahkan user
 const AVAILABLE_CAMERAS = [
@@ -21,6 +22,9 @@ export default function TrafficMonitor() {
   const [deletingId,   setDeletingId]   = useState(null); // camera id yang sedang konfirmasi hapus
   const [showAddModal, setShowAddModal] = useState(false);
   const [addedIds,     setAddedIds]     = useState(new Set()); // id kamera yang sudah ditambahkan
+
+  const { t } = useLanguage();
+  const tm = t.trafficMonitorPage || {};
 
   useEffect(() => {
     api.get('/monitor/cameras').then((data) => {
@@ -72,7 +76,7 @@ export default function TrafficMonitor() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full bg-transparent outline-none placeholder:text-slate-500"
-              placeholder="Cari lokasi, kamera, ID..."
+              placeholder={tm.searchPlaceholder}
             />
           </label>
 

@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Bell, Camera, Globe, Moon, RefreshCw, Save, Sun, Monitor, Settings as Gear, Clock, Laptop } from 'lucide-react';
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { useTheme } from '../Context/ThemeContext.jsx';
+import { useTimezone, TIMEZONE_OPTIONS } from '../Context/TimezoneContext.jsx';
+import { useDateFormat, DATE_FORMAT_OPTIONS } from '../Context/DateFormatContext.jsx';
 
 const tabs = ['Akun', 'Model AI', 'Kamera', 'Notifikasi'];
 
@@ -36,6 +38,8 @@ function useTokens(isDark) {
 export default function Settings() {
   const { lang, setLang, t }                             = useLanguage();
   const { themeMode, setThemeMode, activeTheme, isDark } = useTheme();
+  const { timezone, setTimezone }                        = useTimezone();
+  const { dateFormat, setDateFormat }                    = useDateFormat();
   const [tab, setTab]                                    = useState(0);
 
   const autoTheme = useMemo(() => {
@@ -59,7 +63,7 @@ export default function Settings() {
         ))}
       </div>
 
-      {tab === 0 && <Akun themeMode={themeMode} setThemeMode={setThemeMode} autoTheme={autoTheme} activeTheme={activeTheme} isDark={isDark} tk={tk} t={t} lang={lang} setLang={setLang} />}
+      {tab === 0 && <Akun themeMode={themeMode} setThemeMode={setThemeMode} autoTheme={autoTheme} activeTheme={activeTheme} isDark={isDark} tk={tk} t={t} lang={lang} setLang={setLang} timezone={timezone} setTimezone={setTimezone} />}
       {tab === 1 && <ModelAI   isDark={isDark} tk={tk} t={t} />}
       {tab === 2 && <Kamera    isDark={isDark} tk={tk} t={t} />}
       {tab === 3 && <Notifikasi isDark={isDark} tk={tk} t={t} />}
@@ -78,7 +82,8 @@ function Section({ title, icon, children, tk }) {
 }
 
 // ─── Tab: Akun ─────────────────────────────────────────────────────────────
-function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, lang, setLang }) {
+function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, lang, setLang, timezone, setTimezone, dateFormat, setDateFormat }) {
+  
   const a = t.akun;
   const themeOptions = [
     ['Dark',   Moon,   a.dark,   a.darkSub  ],
@@ -130,17 +135,39 @@ function Akun({ themeMode, setThemeMode, autoTheme, activeTheme, isDark, tk, t, 
             </select>
           </div>
 
-          <SelectField icon={<Clock size={14} />} label={a.timezone} tk={tk}>
-            <option>WIB (Asia/Jakarta) UTC+7</option>
-            <option>WITA (Asia/Makassar) UTC+8</option>
-            <option>WIT (Asia/Jayapura) UTC+9</option>
-          </SelectField>
+          {/* Timezone — terhubung ke TimezoneContext */}
+          <div>
+            <p className={`mb-2 flex items-center gap-1.5 text-sm ${tk.subtext}`}>
+              <Clock size={14} /> {a.timezone}
+            </p>
+            <select
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              className={`w-full rounded-xl border px-4 py-3 font-semibold outline-none transition-colors focus:ring-1 focus:ring-cyan-400 ${tk.input}`}
+            >
+              {TIMEZONE_OPTIONS.map((tz) => (
+                <option key={tz.value} value={tz.value}>{tz.label}</option>
+              ))}
+            </select>
+          </div>
 
-          <SelectField label={a.dateFormat} tk={tk}>
-            <option>DD/MM/YYYY (12/05/2026)</option>
-            <option>MM/DD/YYYY (05/12/2026)</option>
-            <option>YYYY-MM-DD (2026-05-12)</option>
-          </SelectField>
+          <div>
+            <p className={`mb-2 flex items-center gap-1.5 text-sm ${tk.subtext}`}>
+              {a.dateFormat}
+            </p>
+            
+          <select
+          value={dateFormat}
+          onChange={(e) => setDateFormat(e.target.value)}
+          className={`w-full rounded-xl border px-4 py-3 font-semibold outline-none transition-colors focus:ring-1 focus:ring-cyan-400 ${tk.input}`}
+        >
+          {DATE_FORMAT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+         </select>
+         </div>
         </div>
       </Section>
 

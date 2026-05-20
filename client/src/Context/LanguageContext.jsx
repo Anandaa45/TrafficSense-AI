@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect,} from 'react';
 
 // ─── Kamus Terjemahan ──────────────────────────────────────────────────────
 const translations = {
   id: {
     // AppLayout – Sidebar nav
     nav: {
-      dashboard:  'Dashboard',
-      monitor:    'Traffic Monitor',
-      analytics:  'Analytics',
-      reports:    'Reports',
+      dashboard:  'Dasbor',
+      monitor:    'Monitor Lalu Lintas',
+      analytics:  'Analitik',
+      reports:    'Laporan',
       settings:   'Pengaturan',
     },
     // AppLayout – Header subtitles
@@ -88,7 +88,68 @@ const translations = {
     // Buttons
     save:  'Simpan Perubahan',
     reset: 'Reset Default',
+  
+    systemLabel1: 'Sistem Deteksi Kepadatan',
+    systemLabel2: 'Lalu Lintas',
+
+    dashboardPage: {
+      trafficTrendTitle: 'Tren Kepadatan Lalu Lintas',
+      trafficTrendSub: '24 jam terakhir — semua lokasi',
+      dataset: 'Dataset',
+      smooth: 'Lancar',
+      dense: 'Padat',
+      jammed: 'Macet',
+      statusDistribution: 'Distribusi Status',
+      currentAllPoints: 'Saat ini — semua titik',
+
+    reportsPage: {
+      todayIncidents: 'Insiden Hari Ini',
+      reportList: 'Daftar Laporan',
+      searchPlaceholder: 'Cari laporan...',
+      type: 'Tipe',
+      duration: 'Durasi',
+      vehicles: 'kendaraan',
+      tableTitle: 'Judul',
+      tableType: 'Tipe',
+      tableSize: 'Ukuran',
+      tableAction: 'Aksi',
+    },
+    
+    analyticsPage: {
+      vehicleTypesTitle: 'Jenis Kendaraan',
+      vehicleTypesSub: 'Distribusi tipe kendaraan terdeteksi',
+      peakHourTitle: 'Jam Puncak per Lokasi',
+      peakHourSub: 'Rata-rata volume kendaraan tertinggi',
+      monthlyVolumeTitle: 'Volume Kendaraan Bulanan',
+      monthlyVolumeSub: 'Ringkasan total kendaraan terdeteksi setiap bulan',
+      avg: 'Rata-rata',
+      max: 'Maks',
+    },
+    
+    trafficMonitorPage: {
+      searchPlaceholder: 'Cari lokasi, kamera, ID...',
+      cameraOnline: 'Kamera Online',
+      addCamera: 'Tambah Kamera',
+      refresh: 'Refresh',
+      live: 'LIVE',
+      deleteConfirm: 'Hapus kamera ini?',
+      yes: 'Ya',
+      cancel: 'Batal',
+      deleteCamera: 'Hapus Kamera',
+      noCameraFound: 'Tidak ada kamera ditemukan',
+      vehiclesDetected: 'kendaraan terdeteksi',
+      cameraId: 'ID Kamera',
+      vehicles: 'Kendaraan',
+      confidence: 'Confidence',networkStatus: 'Status Jaringan',
+      chooseCamera: 'Pilih kamera dari daftar',
+      officialCctvAvailable: 'Live CCTV tersedia di sumber resmi',
+      openOfficialCctvHint: 'Klik tombol di bawah untuk membuka kamera.',
+      openOfficialCctv: 'Buka CCTV Resmi',
+      done: 'Selesai',
+    },
+    },
   },
+
 
   // ── English (US) ──────────────────────────────────────────────────────────
   en: {
@@ -166,6 +227,67 @@ const translations = {
     },
     save:  'Save Changes',
     reset: 'Reset to Default',
+
+    systemLabel1: 'Traffic Density',
+    systemLabel2: 'Detection System',
+    
+    dashboardPage: {
+      trafficTrendTitle: 'Traffic Density Trend',
+      trafficTrendSub: 'Last 24 hours — all locations',
+      dataset: 'Dataset',
+      smooth: 'Smooth',
+      dense: 'Dense',
+      jammed: 'Congested',
+      statusDistribution: 'Status Distribution',
+      currentAllPoints: 'Current — all points',
+    },
+
+    reportsPage: {
+      todayIncidents: 'Today Incidents',
+      reportList: 'Report List',
+      searchPlaceholder: 'Search reports...',
+      type: 'Type',
+      duration: 'Duration',
+      vehicles: 'vehicles',
+      tableTitle: 'Title',
+      tableType: 'Type',
+      tableSize: 'Size',
+      tableAction: 'Action',
+    },
+    
+    analyticsPage: {
+      vehicleTypesTitle: 'Vehicle Types',
+      vehicleTypesSub: 'Distribution of detected vehicle types',
+      peakHourTitle: 'Peak Hours by Location',
+      peakHourSub: 'Average highest vehicle volume',
+      monthlyVolumeTitle: 'Monthly Vehicle Volume',
+      monthlyVolumeSub: 'Summary of total detected vehicles each month',
+      avg: 'Avg',
+      max: 'Max',
+    },
+    
+    trafficMonitorPage: {
+      searchPlaceholder: 'Search location, camera, ID...',
+      cameraOnline: 'Cameras Online',
+      addCamera: 'Add Camera',
+      refresh: 'Refresh',
+      live: 'LIVE',
+      deleteConfirm: 'Delete this camera?',
+      yes: 'Yes',
+      cancel: 'Cancel',
+      deleteCamera: 'Delete Camera',
+      noCameraFound: 'No camera found',
+      vehiclesDetected: 'vehicles detected',
+      cameraId: 'Camera ID',
+      vehicles: 'Vehicles',
+      confidence: 'Confidence',
+      networkStatus: 'Network Status',
+      chooseCamera: 'Choose a camera from the list',
+      officialCctvAvailable: 'Live CCTV is available from the official source',
+      openOfficialCctvHint: 'Click the button below to open the camera.',
+      openOfficialCctv: 'Open Official CCTV',
+      done: 'Done',
+    },
   },
 
   // ── English (UK) ──────────────────────────────────────────────────────────
@@ -244,6 +366,20 @@ const translations = {
     },
     save:  'Save Changes',
     reset: 'Reset to Default',
+
+    systemLabel1: 'Traffic Density',
+    systemLabel2: 'Detection System',
+    
+    dashboardPage: {
+      trafficTrendTitle: 'Traffic Density Trend',
+      trafficTrendSub: 'Last 24 hours — all locations',
+      dataset: 'Dataset',
+      smooth: 'Smooth',
+      dense: 'Dense',
+      jammed: 'Congested',
+      statusDistribution: 'Status Distribution',
+      currentAllPoints: 'Current — all points',
+    },
   },
 };
 
@@ -251,7 +387,14 @@ const translations = {
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState('id'); // default: Bahasa Indonesia
+  const [lang, setLang] = useState(() => {
+    return localStorage.getItem('trafficSense_lang') || 'id';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('trafficSense_lang', lang);
+  }, [lang]);
+
   const t = translations[lang] ?? translations['id'];
 
   return (
@@ -263,6 +406,10 @@ export function LanguageProvider({ children }) {
 
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error('useLanguage must be used inside <LanguageProvider>');
+
+  if (!ctx) {
+    throw new Error('useLanguage must be used inside <LanguageProvider>');
+  }
+
   return ctx;
 }
