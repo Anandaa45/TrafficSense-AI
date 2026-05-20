@@ -1,178 +1,291 @@
-import { useLanguage } from '../Context/LanguageContext.jsx';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AlertTriangle,
   ChevronRight,
-  Download,
-  Search,
+  Clock,
+  MapPin,
+  X,
+  Car,
+  Activity,
+  CheckCircle2,
 } from 'lucide-react';
-import { useTheme } from '../Context/ThemeContext.jsx';
+
+const incidents = [
+  {
+    id: 1,
+    road: 'Jl. Sudirman',
+    type: 'Macet',
+    duration: '2j 18m',
+    vehicles: 48,
+    time: '07:42',
+    date: '18 Mei 2025',
+    status: 'Resolved',
+    level: 'Sedang',
+    color: 'green',
+    description:
+      'Kepadatan lalu lintas terjadi pada jam berangkat kerja. Arus kendaraan sudah kembali normal setelah dilakukan pengalihan ringan.',
+    recommendation:
+      'Tetap pantau arus kendaraan pada jam 07:00 - 09:00 karena lokasi ini berpotensi padat saat hari kerja.',
+  },
+  {
+    id: 2,
+    road: 'Bundaran HI',
+    type: 'Kecelakaan',
+    duration: '45m',
+    vehicles: 32,
+    time: '09:15',
+    date: '18 Mei 2025',
+    status: 'Resolved',
+    level: 'Rendah',
+    color: 'green',
+    description:
+      'Terjadi insiden kecelakaan ringan yang menyebabkan perlambatan arus lalu lintas sementara.',
+    recommendation:
+      'Area sudah kembali lancar, tetapi sistem tetap menyarankan pemantauan kamera selama 30 menit setelah insiden.',
+  },
+  {
+    id: 3,
+    road: 'Jl. TB Simatupang',
+    type: 'Macet',
+    duration: '1j 32m',
+    vehicles: 51,
+    time: '17:30',
+    date: '18 Mei 2025',
+    status: 'Aktif',
+    level: 'Tinggi',
+    color: 'red',
+    description:
+      'Kepadatan tinggi terdeteksi pada jam pulang kerja. Volume kendaraan meningkat dan kecepatan rata-rata menurun.',
+    recommendation:
+      'Disarankan pengalihan rute sementara dan peningkatan pemantauan pada titik masuk persimpangan.',
+  },
+  {
+    id: 4,
+    road: 'Jl. Gatot Subroto',
+    type: 'Macet',
+    duration: '55m',
+    vehicles: 38,
+    time: '18:05',
+    date: '18 Mei 2025',
+    status: 'Aktif',
+    level: 'Tinggi',
+    color: 'red',
+    description:
+      'Kemacetan aktif terjadi karena peningkatan volume kendaraan pada sore hari.',
+    recommendation:
+      'Sistem menyarankan monitoring lanjutan dan memberi peringatan kepada pengguna untuk memilih rute alternatif.',
+  },
+];
 
 export default function Reports() {
-  const { isDark } = useTheme();
-  const { t } = useLanguage();
-  const r = t.reportsPage || {};
-
-  const cardClass = isDark
-    ? 'bg-[#0b1228] border border-slate-700 text-white'
-    : 'bg-white border border-slate-200 text-slate-900 shadow-sm';
-
-  const titleText = isDark ? 'text-white' : 'text-slate-900';
-  const bodyText = isDark ? 'text-slate-300' : 'text-slate-700';
-  const mutedText = isDark ? 'text-slate-400' : 'text-slate-500';
-  const lineClass = isDark ? 'border-slate-800' : 'border-slate-200';
-
-  const searchBox = isDark
-    ? 'bg-slate-800 border-slate-700 text-slate-300'
-    : 'bg-white border-slate-200 text-slate-700 shadow-sm';
-
-  const inputText = isDark
-    ? 'placeholder:text-slate-500 text-white'
-    : 'placeholder:text-slate-400 text-slate-900';
-
-  const incidents = [
-    ['Jl. Sudirman', 'macet', '2j 18m', 48, '07:42', 'Resolved'],
-    ['Bundaran HI', 'kecelakaan', '45m', 32, '09:15', 'Resolved'],
-    ['Jl. TB Simatupang', 'macet', '1j 32m', 51, '17:30', 'Aktif'],
-    ['Jl. Gatot Subroto', 'macet', '55m', 38, '18:05', 'Aktif'],
-  ];
-
-  const reports = [
-    ['RPT-2026-001', 'Laporan Harian — 14 Mei 2026', 'Harian', '2.8 MB'],
-    ['RPT-2026-W01', 'Laporan Mingguan — Minggu ke-1', 'Mingguan', '8.5 MB'],
-    ['RPT-2026-05', 'Laporan Bulanan — Mei 2026', 'Bulanan', '25.1 MB'],
-  ];
+  const [selectedIncident, setSelectedIncident] = useState(null);
 
   return (
-    <div className="space-y-6">
-      {/* Insiden Hari Ini */}
-      <section className={`overflow-hidden rounded-2xl transition-colors ${cardClass}`}>
-        <div className={`flex items-center justify-between border-b p-5 ${lineClass}`}>
-          <h3 className={`flex items-center gap-2 text-xl font-extrabold ${titleText}`}>
-            <AlertTriangle size={18} className="text-rose-500" />
-            {r.todayIncidents}
-          </h3>
+    <div className="relative">
+      <div className="rounded-2xl border border-slate-700 bg-[#0b1228]">
+        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-5">
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={18} className="text-pink-500" />
+            <h2 className="text-lg font-extrabold text-white">
+              Insiden Hari Ini
+            </h2>
+          </div>
 
-          <span className={`text-sm ${mutedText}`}>
-            18 Mei 2025
-          </span>
+          <p className="text-sm text-slate-400">18 Mei 2025</p>
         </div>
 
-        {incidents.map(([loc, type, dur, veh, time, status]) => (
-          <div
-            key={loc}
-            className={`flex items-center justify-between border-b p-5 last:border-0 ${lineClass}`}
-          >
-            <div className="flex items-start gap-4">
-              <span
-                className={`mt-1 h-3 w-3 rounded-full ${
-                  status === 'Aktif' ? 'bg-rose-500' : 'bg-emerald-400'
-                }`}
-              />
+        <div>
+          {incidents.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between border-b border-slate-800 px-5 py-5 last:border-b-0"
+            >
+              <div className="flex items-start gap-4">
+                <span
+                  className={`mt-1 h-3 w-3 rounded-full ${
+                    item.color === 'green' ? 'bg-emerald-400' : 'bg-pink-500'
+                  }`}
+                />
 
-              <div>
-                <p className={`font-extrabold ${titleText}`}>
-                  {loc}
-                </p>
+                <div>
+                  <h3 className="font-extrabold text-white">{item.road}</h3>
 
-                <p className={`mt-1 text-sm ${mutedText}`}>
-                  Tipe: {type} &nbsp; Durasi: {dur} &nbsp; {veh} kendaraan
-                </p>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Tipe: {item.type} &nbsp; Durasi: {item.duration} &nbsp;
+                    {item.vehicles} kendaraan
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-5">
+                <div className="text-right">
+                  <p className="text-sm text-slate-400">{item.time}</p>
+
+                  <p
+                    className={`font-bold ${
+                      item.status === 'Resolved'
+                        ? 'text-emerald-400'
+                        : 'text-pink-500'
+                    }`}
+                  >
+                    {item.status}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedIncident(item)}
+                  className="rounded-lg p-2 text-slate-500 transition hover:bg-white/10 hover:text-cyan-300"
+                >
+                  <ChevronRight size={22} />
+                </button>
               </div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            <div className="flex items-center gap-4 text-right">
+      {/* Overlay */}
+      {selectedIncident && (
+        <button
+          type="button"
+          aria-label="Tutup side information"
+          onClick={() => setSelectedIncident(null)}
+          className="fixed inset-0 z-40 bg-black/50"
+        />
+      )}
+
+      {/* Side Information */}
+      <aside
+        className={`fixed right-0 top-0 z-50 h-screen w-full max-w-md border-l border-slate-700 bg-[#080f26] shadow-2xl transition-transform duration-300 ${
+          selectedIncident ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {selectedIncident && (
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-slate-800 px-6 py-5">
               <div>
-                <p className={`text-sm ${mutedText}`}>
-                  {time}
+                <p className="text-sm font-bold text-cyan-400">
+                  Side Information
                 </p>
+                <h2 className="mt-1 text-2xl font-extrabold text-white">
+                  {selectedIncident.road}
+                </h2>
+              </div>
 
-                <p
-                  className={`font-semibold ${
-                    status === 'Aktif' ? 'text-rose-500' : 'text-emerald-500'
-                  }`}
-                >
-                  {status}
+              <button
+                type="button"
+                onClick={() => setSelectedIncident(null)}
+                className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 space-y-5 overflow-y-auto p-6">
+              <div className="rounded-2xl border border-slate-700 bg-white/5 p-5">
+                <div className="flex items-center gap-3">
+                  <MapPin className="text-cyan-400" size={22} />
+                  <div>
+                    <p className="text-sm text-slate-400">Lokasi Jalan</p>
+                    <h3 className="font-extrabold text-white">
+                      {selectedIncident.road}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-slate-700 bg-white/5 p-4">
+                  <Clock className="mb-3 text-cyan-400" size={22} />
+                  <p className="text-sm text-slate-400">Waktu</p>
+                  <h3 className="mt-1 font-extrabold text-white">
+                    {selectedIncident.time}
+                  </h3>
+                </div>
+
+                <div className="rounded-2xl border border-slate-700 bg-white/5 p-4">
+                  <Activity className="mb-3 text-cyan-400" size={22} />
+                  <p className="text-sm text-slate-400">Durasi</p>
+                  <h3 className="mt-1 font-extrabold text-white">
+                    {selectedIncident.duration}
+                  </h3>
+                </div>
+
+                <div className="rounded-2xl border border-slate-700 bg-white/5 p-4">
+                  <Car className="mb-3 text-cyan-400" size={22} />
+                  <p className="text-sm text-slate-400">Kendaraan</p>
+                  <h3 className="mt-1 font-extrabold text-white">
+                    {selectedIncident.vehicles}
+                  </h3>
+                </div>
+
+                <div className="rounded-2xl border border-slate-700 bg-white/5 p-4">
+                  <CheckCircle2
+                    className={
+                      selectedIncident.status === 'Resolved'
+                        ? 'mb-3 text-emerald-400'
+                        : 'mb-3 text-pink-500'
+                    }
+                    size={22}
+                  />
+                  <p className="text-sm text-slate-400">Status</p>
+                  <h3
+                    className={`mt-1 font-extrabold ${
+                      selectedIncident.status === 'Resolved'
+                        ? 'text-emerald-400'
+                        : 'text-pink-500'
+                    }`}
+                  >
+                    {selectedIncident.status}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-700 bg-white/5 p-5">
+                <p className="text-sm text-slate-400">Tipe Insiden</p>
+                <h3 className="mt-1 text-xl font-extrabold text-white">
+                  {selectedIncident.type}
+                </h3>
+
+                <p className="mt-4 text-sm leading-6 text-slate-300">
+                  {selectedIncident.description}
                 </p>
               </div>
 
-              <ChevronRight
-                size={18}
-                className={isDark ? 'text-slate-500' : 'text-slate-400'}
-              />
+              <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-5">
+                <p className="text-sm font-bold text-cyan-400">
+                  Rekomendasi AI
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  {selectedIncident.recommendation}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-700 bg-white/5 p-5">
+                <p className="text-sm text-slate-400">Tingkat Kepadatan</p>
+
+                <div className="mt-3 h-3 rounded-full bg-slate-700">
+                  <div
+                    className={`h-3 rounded-full ${
+                      selectedIncident.level === 'Tinggi'
+                        ? 'w-[85%] bg-pink-500'
+                        : selectedIncident.level === 'Sedang'
+                        ? 'w-[60%] bg-yellow-400'
+                        : 'w-[35%] bg-emerald-400'
+                    }`}
+                  />
+                </div>
+
+                <p className="mt-3 font-bold text-white">
+                  {selectedIncident.level}
+                </p>
+              </div>
             </div>
           </div>
-        ))}
-      </section>
-
-      {/* Daftar Laporan */}
-      <section className={`rounded-2xl p-5 transition-colors ${cardClass}`}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h3 className={`text-xl font-extrabold ${titleText}`}>
-            Daftar Laporan
-          </h3>
-
-          <label className={`flex items-center gap-2 rounded-xl border px-4 py-2 ${searchBox}`}>
-            <Search size={16} className="opacity-70" />
-
-            <input
-              className={`bg-transparent outline-none ${inputText}`}
-              placeholder="Cari laporan..."
-            />
-          </label>
-        </div>
-
-        <div className="mt-5 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className={mutedText}>
-              <tr>
-                <th className="py-3 font-bold">ID</th>
-                <th className="font-bold">Judul</th>
-                <th className="font-bold">Tipe</th>
-                <th className="font-bold">Ukuran</th>
-                <th className="font-bold">Aksi</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {reports.map(([id, title, type, size]) => (
-                <tr key={id} className={`border-t ${lineClass}`}>
-                  <td className={`py-4 ${bodyText}`}>
-                    {id}
-                  </td>
-
-                  <td className={`font-semibold ${titleText}`}>
-                    {title}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${
-                        isDark
-                          ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
-                          : 'border-cyan-200 bg-cyan-50 text-cyan-600'
-                      }`}
-                    >
-                      {type}
-                    </span>
-                  </td>
-
-                  <td className={mutedText}>
-                    {size}
-                  </td>
-
-                  <td>
-                    <button className="inline-flex items-center gap-2 font-semibold text-cyan-500 hover:text-cyan-600">
-                      <Download size={15} />
-                      PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+        )}
+      </aside>
     </div>
   );
 }
