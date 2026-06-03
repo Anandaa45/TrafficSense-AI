@@ -1,11 +1,31 @@
-import React from 'react';
-import { BarChart3 } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { BarChart3, Activity, Gauge, FileVideo, Car, Bike, Bus, Truck } from 'lucide-react';
 import { useTheme } from '../Context/ThemeContext.jsx';
 import { useLanguage } from '../Context/LanguageContext.jsx';
+
+const LATEST_KEY = 'trafficSense_latest_analysis';
+const HISTORY_KEY = 'trafficSense_analysis_history';
+
 export default function Analytics() {
   const { isDark } = useTheme();
   const { t } = useLanguage();
   const a = t.analyticsPage || {};
+
+  const latestAnalysis = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem(LATEST_KEY) || 'null');
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const history = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }, []);
 
   const cardClass = isDark
     ? 'bg-[#0b1228] border border-slate-700 text-white'
@@ -18,151 +38,246 @@ export default function Analytics() {
   const titleText = isDark ? 'text-white' : 'text-slate-950';
   const mutedText = isDark ? 'text-slate-400' : 'text-slate-600';
   const bodyText = isDark ? 'text-slate-300' : 'text-slate-800';
-
   const progressBg = isDark ? 'bg-slate-700' : 'bg-slate-300';
-  const chartBorder = isDark ? 'border-slate-700' : 'border-slate-300';
-  const monthText = isDark ? 'text-slate-400' : 'text-slate-600';
 
-  const vehicleTypes = [
-    ['Motor', 48, 'bg-cyan-400'],
-    ['Mobil Pribadi', 35, 'bg-emerald-400'],
-    ['Bus', 8, 'bg-amber-400'],
-    ['Truk', 6, 'bg-violet-400'],
-    ['Lainnya', 3, 'bg-slate-400'],
-  ];
+  const vehicleTypes = latestAnalysis
+    ? [
+        ['Motor', latestAnalysis.vehicleTypes?.motor || 0, 'bg-cyan-400', Bike],
+        ['Mobil', latestAnalysis.vehicleTypes?.car || 0, 'bg-emerald-400', Car],
+        ['Bus', latestAnalysis.vehicleTypes?.bus || 0, 'bg-amber-400', Bus],
+        ['Truk', latestAnalysis.vehicleTypes?.truck || 0, 'bg-violet-400', Truck],
+      ]
+    : [];
 
-  const peak = [
-    ['Jl. Sudirman', '07:30 - 09:00', '1,842', '2,156'],
-    ['Bundaran HI', '08:00 - 09:30', '1,654', '1,985'],
-    ['Jl. TB Simatupang', '07:00 - 08:30', '1,523', '1,876'],
-    ['Jl. Gatot Subroto', '17:00 - 18:30', '1,388', '1,690'],
-  ];
+  const totalVehicles = latestAnalysis?.totalVehicles || 0;
 
-  const monthlyVolume = [
-    280, 315, 300, 345, 385, 398, 420, 392, 438, 454, 441, 470,
-  ];
+  function formatDate(value) {
+    if (!value) return '-';
 
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-  ];
+    return new Date(value).toLocaleString('id-ID', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  }
+
+  function statusClass(status) {
+    if (status === 'macet') return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+    if (status === 'padat') return 'text-amber-300 bg-amber-500/10 border-amber-500/30';
+    return 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30';
+  }
+
+  if (!latestAnalysis) {
+    return (
+      <div className={`rounded-3xl p-10 text-center ${cardClass}`}>
+        <Activity size={52} className="mx-auto text-cyan-400" />
+        <h2 className={`mt-4 text-2xl font-extrabold ${titleText}`}>
+          Belum Ada Data Analisis
+        </h2>
+        <p className={`mt-2 ${mutedText}`}>
+          Upload foto atau video di halaman Traffic Monitor, lalu klik Analisis AI.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
-      {/* Jenis Kendaraan */}
-      <section className={`rounded-2xl p-6 transition-colors ${cardClass}`}>
-        <h3 className={`text-xl font-extrabold ${titleText}`}>
-          {a.vehicleTypesTitle}
-        </h3>
+    <div className="space-y-6">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard
+          icon={<Car size={22} />}
+          label="Total Kendaraan"
+          value={totalVehicles}
+          cardClass={cardClass}
+          mutedText={mutedText}
+          titleText={titleText}
+        />
 
-        <p className={`mt-1 text-sm ${mutedText}`}>
-          Distribusi tipe kendaraan terdeteksi
-        </p>
+        <SummaryCard
+          icon={<Gauge size={22} />}
+          label="Status Lalu Lintas"
+          value={latestAnalysis.status?.toUpperCase() || '-'}
+          cardClass={cardClass}
+          mutedText={mutedText}
+          titleText={titleText}
+          badgeClass={statusClass(latestAnalysis.status)}
+        />
 
-        <div className="mt-8 space-y-5">
-          {vehicleTypes.map(([name, value, color]) => (
-            <div key={name}>
-              <div className="mb-2 flex justify-between">
-                <span className={`flex items-center gap-2 font-medium ${bodyText}`}>
-                  <i className={`h-3 w-3 rounded-full ${color}`} />
-                  {name}
-                </span>
+        <SummaryCard
+          icon={<Activity size={22} />}
+          label="Confidence"
+          value={`${latestAnalysis.confidence || 0}%`}
+          cardClass={cardClass}
+          mutedText={mutedText}
+          titleText={titleText}
+        />
 
-                <b className={titleText}>{value}%</b>
-              </div>
+        <SummaryCard
+          icon={<FileVideo size={22} />}
+          label="Media Dianalisis"
+          value={history.length}
+          cardClass={cardClass}
+          mutedText={mutedText}
+          titleText={titleText}
+        />
+      </div>
 
-              <div className={`h-2 rounded-full ${progressBg}`}>
-                <div
-                  className={`h-2 rounded-full ${color}`}
-                  style={{ width: `${value}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className={`rounded-2xl p-6 transition-colors ${cardClass}`}>
+          <h3 className={`text-xl font-extrabold ${titleText}`}>
+            {a.vehicleTypesTitle || 'Distribusi Kendaraan'}
+          </h3>
 
-      {/* Jam Puncak */}
-      <section className={`rounded-2xl p-6 transition-colors ${cardClass}`}>
-        <h3 className={`text-xl font-extrabold ${titleText}`}>
-          Jam Puncak per Lokasi
-        </h3>
+          <p className={`mt-1 text-sm ${mutedText}`}>
+            Hasil analisis dari media terakhir yang di-upload.
+          </p>
 
-        <p className={`mt-1 text-sm ${mutedText}`}>
-          Rata-rata volume kendaraan tertinggi
-        </p>
+          <div className="mt-8 space-y-5">
+            {vehicleTypes.map(([name, value, color, Icon]) => {
+              const percent = totalVehicles > 0 ? Math.round((value / totalVehicles) * 100) : 0;
 
-        <div className="mt-6 space-y-4">
-          {peak.map(([name, time, avg, max]) => (
-            <div
-              key={name}
-              className={`rounded-xl p-4 transition-colors ${innerBox}`}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className={`font-extrabold ${titleText}`}>
-                    {name}
-                  </p>
+              return (
+                <div key={name}>
+                  <div className="mb-2 flex justify-between">
+                    <span className={`flex items-center gap-2 font-medium ${bodyText}`}>
+                      <Icon size={17} className="text-cyan-400" />
+                      {name}
+                    </span>
 
-                  <span
-                    className={`mt-3 inline-block rounded-lg px-2 py-1 text-xs font-bold ${
-                      isDark
-                        ? 'bg-amber-400/10 text-amber-300'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {time}
-                  </span>
-                </div>
-
-                <div className={`text-right text-sm ${bodyText}`}>
-                  <p>
-                    Avg:{' '}
                     <b className={titleText}>
-                      {avg}
+                      {value} <span className={mutedText}>({percent}%)</span>
                     </b>
-                  </p>
+                  </div>
 
-                  <p>
-                    Maks:{' '}
-                    <b className={isDark ? 'text-rose-400' : 'text-rose-600'}>
-                      {max}
-                    </b>
-                  </p>
+                  <div className={`h-2 rounded-full ${progressBg}`}>
+                    <div
+                      className={`h-2 rounded-full ${color}`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
 
-      {/* Volume Kendaraan Bulanan */}
-      <section className={`rounded-2xl p-6 transition-colors xl:col-span-2 ${cardClass}`}>
-        <h3 className={`flex items-center gap-2 text-xl font-extrabold ${titleText}`}>
-          <BarChart3 size={18} className="text-cyan-400" />
-          Volume Kendaraan Bulanan
-        </h3>
+        <section className={`rounded-2xl p-6 transition-colors ${cardClass}`}>
+          <h3 className={`text-xl font-extrabold ${titleText}`}>
+            Detail Media Terakhir
+          </h3>
 
-        <p className={`mt-1 text-sm ${mutedText}`}>
-          Ringkasan total kendaraan terdeteksi setiap bulan
-        </p>
+          <p className={`mt-1 text-sm ${mutedText}`}>
+            Informasi file yang terakhir dianalisis.
+          </p>
 
-        <div className={`mt-6 flex h-52 items-end gap-4 rounded-xl border-b px-4 pb-2 ${chartBorder}`}>
-          {monthlyVolume.map((value, index) => (
-            <div key={index} className="flex flex-1 flex-col items-center gap-2">
-              <div
-                className="w-full max-w-6 rounded-t bg-cyan-400 transition-all hover:opacity-80"
-                style={{ height: `${(value / 500) * 160}px` }}
-                title={`${months[index]}: ${value}`}
-              />
+          <div className="mt-6 space-y-4">
+            <InfoRow label="Nama File" value={latestAnalysis.fileName} innerBox={innerBox} titleText={titleText} mutedText={mutedText} />
+            <InfoRow label="Tipe Media" value={latestAnalysis.mediaType === 'video' ? 'Video' : 'Foto'} innerBox={innerBox} titleText={titleText} mutedText={mutedText} />
+            <InfoRow label="Waktu Analisis" value={formatDate(latestAnalysis.analyzedAt)} innerBox={innerBox} titleText={titleText} mutedText={mutedText} />
 
-              <span className={`text-xs font-medium ${monthText}`}>
-                {months[index]}
+            <div className={`rounded-xl p-4 ${innerBox}`}>
+              <p className={`text-sm ${mutedText}`}>Status</p>
+              <span className={`mt-2 inline-flex rounded-full border px-4 py-2 text-sm font-extrabold uppercase ${statusClass(latestAnalysis.status)}`}>
+                {latestAnalysis.status}
               </span>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
+
+        <section className={`rounded-2xl p-6 transition-colors xl:col-span-2 ${cardClass}`}>
+          <h3 className={`flex items-center gap-2 text-xl font-extrabold ${titleText}`}>
+            <BarChart3 size={18} className="text-cyan-400" />
+            Riwayat Analisis
+          </h3>
+
+          <p className={`mt-1 text-sm ${mutedText}`}>
+            Riwayat upload dan hasil analisis terakhir.
+          </p>
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className={mutedText}>
+                <tr>
+                  <th className="py-3 font-bold">Tanggal</th>
+                  <th className="font-bold">File</th>
+                  <th className="font-bold">Tipe</th>
+                  <th className="font-bold">Total</th>
+                  <th className="font-bold">Confidence</th>
+                  <th className="font-bold">Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {history.map((item) => (
+                  <tr key={item.id} className="border-t border-white/10">
+                    <td className={`py-4 ${bodyText}`}>
+                      {formatDate(item.analyzedAt)}
+                    </td>
+                    <td className={`max-w-[240px] truncate font-semibold ${titleText}`}>
+                      {item.fileName}
+                    </td>
+                    <td className={bodyText}>
+                      {item.mediaType === 'video' ? 'Video' : 'Foto'}
+                    </td>
+                    <td className={bodyText}>
+                      {item.totalVehicles}
+                    </td>
+                    <td className={bodyText}>
+                      {item.confidence}%
+                    </td>
+                    <td>
+                      <span className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${statusClass(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+
+                {history.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className={`py-8 text-center ${mutedText}`}>
+                      Belum ada riwayat analisis.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({ icon, label, value, cardClass, mutedText, titleText, badgeClass }) {
+  return (
+    <section className={`rounded-2xl p-5 ${cardClass}`}>
+      <div className="flex items-center gap-2 text-cyan-400">
+        {icon}
+        <p className="font-bold">{label}</p>
+      </div>
+
+      {badgeClass ? (
+        <span className={`mt-5 inline-flex rounded-full border px-4 py-2 text-lg font-extrabold ${badgeClass}`}>
+          {value}
+        </span>
+      ) : (
+        <p className={`mt-5 text-4xl font-extrabold ${titleText}`}>
+          {value}
+        </p>
+      )}
+
+      <p className={`mt-2 text-sm ${mutedText}`}>
+        Berdasarkan hasil analisis terakhir
+      </p>
+    </section>
+  );
+}
+
+function InfoRow({ label, value, innerBox, titleText, mutedText }) {
+  return (
+    <div className={`rounded-xl p-4 ${innerBox}`}>
+      <p className={`text-sm ${mutedText}`}>{label}</p>
+      <p className={`mt-1 break-all font-bold ${titleText}`}>{value}</p>
     </div>
   );
 }
