@@ -205,7 +205,7 @@ async function handleAnalyze() {
         </section>
 
         <section className="panel p-5">
-          <h3 className="text-lg font-extrabold">Riwayat Analisis</h3>
+          <h3 className="text-lg font-extrabold">Hasil Upload</h3>
 
           <div className="mt-4 space-y-3">
             {history.length === 0 && (
@@ -213,7 +213,7 @@ async function handleAnalyze() {
                 Belum ada riwayat analisis
               </div>
             )}
-
+            
             {history.map((item) => (
               <button
                 key={item.id}
@@ -387,7 +387,7 @@ async function handleAnalyze() {
                   <Trash2 size={18} /> Hapus Hasil Analisis
                   </button>
               </div>
-              
+
             </div>
           )}
         </section>
