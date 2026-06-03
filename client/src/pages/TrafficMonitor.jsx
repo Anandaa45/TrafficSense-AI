@@ -57,46 +57,44 @@ export default function TrafficMonitor() {
     return 'lancar';
   }
 
-  function handleAnalyze() {
-    if (!mediaFile) return;
+async function handleAnalyze() {
+  if (!mediaFile) return;
 
-    setAnalyzing(true);
+  setAnalyzing(true);
 
-    setTimeout(() => {
-      const motor = Math.floor(Math.random() * 45) + 20;
-      const car = Math.floor(Math.random() * 35) + 15;
-      const bus = Math.floor(Math.random() * 8) + 1;
-      const truck = Math.floor(Math.random() * 10) + 2;
-      const total = motor + car + bus + truck;
+  const mediaUrl = await fileToDataUrl(mediaFile);
 
-      const result = {
-        id: Date.now(),
-        fileName: mediaFile.name,
-        fileType: mediaFile.type,
-        mediaType: isVideo ? 'video' : 'image',
-        analyzedAt: new Date().toISOString(),
-        totalVehicles: total,
-        confidence: Number((Math.random() * 5 + 93).toFixed(1)),
-        status: getTrafficStatus(total),
-        vehicleTypes: {
-          motor,
-          car,
-          bus,
-          truck,
-        },
-      };
+  setTimeout(() => {
+    const motor = Math.floor(Math.random() * 45) + 20;
+    const car = Math.floor(Math.random() * 35) + 15;
+    const bus = Math.floor(Math.random() * 8) + 1;
+    const truck = Math.floor(Math.random() * 10) + 2;
+    const total = motor + car + bus + truck;
 
-      const nextHistory = [result, ...history].slice(0, 10);
+    const result = {
+      id: Date.now(),
+      fileName: mediaFile.name,
+      fileType: mediaFile.type,
+      mediaType: isVideo ? 'video' : 'image',
+      mediaUrl,
+      analyzedAt: new Date().toISOString(),
+      totalVehicles: total,
+      confidence: Number((Math.random() * 5 + 93).toFixed(1)),
+      status: getTrafficStatus(total),
+      vehicleTypes: { motor, car, bus, truck },
+    };
 
-      setAnalysisResult(result);
-      setHistory(nextHistory);
+    const nextHistory = [result, ...history].slice(0, 10);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+    setAnalysisResult(result);
+    setHistory(nextHistory);
 
-      setAnalyzing(false);
-    }, 1400);
-  }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+
+    setAnalyzing(false);
+  }, 1400);
+}
 
   function handleClear() {
     if (previewUrl) {
@@ -107,6 +105,28 @@ export default function TrafficMonitor() {
     setPreviewUrl('');
     setAnalysisResult(null);
   }
+
+   function handleDeleteAnalysis() {
+    if (!analysisResult) return;
+    
+    const confirmDelete = window.confirm('Hapus hasil analisis ini?');
+    if (!confirmDelete) return;
+
+  const nextHistory = history.filter((item) => item.id !== analysisResult.id);
+
+  setHistory(nextHistory);
+  setAnalysisResult(null);
+
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+
+  const latest = nextHistory[0] || null;
+
+  if (latest) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(latest));
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
 
   function formatDate(value) {
     return new Date(value).toLocaleString('id-ID', {
@@ -120,6 +140,16 @@ export default function TrafficMonitor() {
     if (status === 'padat') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
     return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
   }
+  
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 
   return (
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
@@ -349,6 +379,15 @@ export default function TrafficMonitor() {
                   {analysisResult.fileName}
                 </p>
               </div>
+              
+              <div className="lg:col-span-4">
+                <button
+                 onClick={handleDeleteAnalysis}
+                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 font-bold text-rose-400 transition hover:bg-rose-500/20" >
+                  <Trash2 size={18} /> Hapus Hasil Analisis
+                  </button>
+              </div>
+              
             </div>
           )}
         </section>
