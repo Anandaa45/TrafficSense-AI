@@ -9,7 +9,6 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import TrafficMonitor from './pages/TrafficMonitor.jsx';
 import Analytics from './pages/Analytics.jsx';
-import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
 

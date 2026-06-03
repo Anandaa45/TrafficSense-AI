@@ -21,7 +21,6 @@ const navIcons = [
   { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
   { to: '/monitor', key: 'monitor', icon: Monitor },
   { to: '/analytics', key: 'analytics', icon: BarChart3 },
-  { to: '/reports', key: 'reports', icon: FileText },
   { to: '/settings', key: 'settings', icon: Settings },
 ];
 
