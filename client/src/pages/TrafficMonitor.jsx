@@ -14,9 +14,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { useLanguage } from '../Context/LanguageContext.jsx';
-
-const STORAGE_KEY = 'trafficSense_latest_analysis';
-const HISTORY_KEY = 'trafficSense_analysis_history';
+import { saveAnalysis, deleteAnalysis, getAnalysisHistory } from '../lib/analysisStorage.js';
 
 export default function TrafficMonitor() {
   const { t } = useLanguage();
@@ -26,13 +24,7 @@ export default function TrafficMonitor() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [history, setHistory] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  });
+  const [history, setHistory] = useState(() => getAnalysisHistory());
 
   const isVideo = useMemo(() => {
     return mediaFile?.type?.startsWith('video/');
@@ -62,9 +54,9 @@ async function handleAnalyze() {
 
   setAnalyzing(true);
 
-  const mediaUrl = await fileToDataUrl(mediaFile);
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 1400));
 
-  setTimeout(() => {
     const motor = Math.floor(Math.random() * 45) + 20;
     const car = Math.floor(Math.random() * 35) + 15;
     const bus = Math.floor(Math.random() * 8) + 1;
@@ -76,24 +68,28 @@ async function handleAnalyze() {
       fileName: mediaFile.name,
       fileType: mediaFile.type,
       mediaType: isVideo ? 'video' : 'image',
-      mediaUrl,
       analyzedAt: new Date().toISOString(),
       totalVehicles: total,
       confidence: Number((Math.random() * 5 + 93).toFixed(1)),
       status: getTrafficStatus(total),
-      vehicleTypes: { motor, car, bus, truck },
+      vehicleTypes: {
+        motor,
+        car,
+        bus,
+        truck,
+      },
     };
 
-    const nextHistory = [result, ...history].slice(0, 10);
+    const nextHistory = await saveAnalysis(result, mediaFile);
 
     setAnalysisResult(result);
     setHistory(nextHistory);
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-
+  } catch (err) {
+    console.error(err);
+    alert('Gagal menyimpan hasil analisis media.');
+  } finally {
     setAnalyzing(false);
-  }, 1400);
+  }
 }
 
   function handleClear() {
@@ -106,25 +102,19 @@ async function handleAnalyze() {
     setAnalysisResult(null);
   }
 
-   function handleDeleteAnalysis() {
+   async function handleDeleteAnalysis() {
     if (!analysisResult) return;
     
     const confirmDelete = window.confirm('Hapus hasil analisis ini?');
     if (!confirmDelete) return;
 
-  const nextHistory = history.filter((item) => item.id !== analysisResult.id);
-
-  setHistory(nextHistory);
-  setAnalysisResult(null);
-
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-
-  const latest = nextHistory[0] || null;
-
-  if (latest) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(latest));
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
+  try {
+    const nextHistory = await deleteAnalysis(analysisResult.id);
+    setHistory(nextHistory);
+    setAnalysisResult(null);
+  } catch (err) {
+    console.error(err);
+    alert('Gagal menghapus hasil analisis.');
   }
 }
 
@@ -140,16 +130,6 @@ async function handleAnalyze() {
     if (status === 'padat') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
     return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
   }
-  
-  function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 
   return (
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
@@ -213,7 +193,7 @@ async function handleAnalyze() {
                 Belum ada riwayat analisis
               </div>
             )}
-            
+
             {history.map((item) => (
               <button
                 key={item.id}
