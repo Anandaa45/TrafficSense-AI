@@ -141,21 +141,13 @@ export default function TrafficMonitor() {
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
       <aside className="space-y-5">
         <section className="panel p-5">
-          <h3 className="text-lg font-extrabold">Upload Media</h3>
+          <h3 className="text-lg font-extrabold">{tm.uploadMedia}</h3>
           <p className="mt-1 text-sm text-slate-400">
             Upload foto atau video lalu jalankan analisis kepadatan lalu lintas.
           </p>
 
           <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-cyan-400/40 bg-cyan-400/5 px-4 py-8 text-center transition hover:bg-cyan-400/10">
             <UploadCloud size={36} className="text-cyan-400" />
-            <p className="mt-3 font-bold text-white">Pilih Foto / Video</p>
-            <p className="mt-1 text-xs text-slate-400">JPG, PNG, MP4, MOV</p>
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleUpload}
-              className="hidden"
-            />
           </label>
 
           {mediaFile && (
@@ -250,7 +242,7 @@ export default function TrafficMonitor() {
               }`}
             >
               <PlayCircle size={18} />
-              {analyzing ? 'Menganalisis...' : 'Analisis AI'}
+              {analyzing ? 'Menganalisis...' : '{tm.analyzeAI}'}
             </button>
           </div>
 
