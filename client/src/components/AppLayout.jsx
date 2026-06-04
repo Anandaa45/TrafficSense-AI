@@ -35,6 +35,25 @@ export default function AppLayout() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
+    function syncSidebarWithViewport() {
+      setSidebarOpen(window.innerWidth >= 1024);
+    }
+
+    window.addEventListener('resize', syncSidebarWithViewport);
+    return () => window.removeEventListener('resize', syncSidebarWithViewport);
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
@@ -132,13 +151,13 @@ export default function AppLayout() {
           type="button"
           aria-label="Tutup sidebar"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[80] bg-black/50 lg:hidden"
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-30 h-screen w-[255px] border-r backdrop-blur-2xl transition-all duration-300 ${sidebar} ${
+        className={`fixed left-0 top-0 z-[90] h-dvh w-[255px] border-r backdrop-blur-2xl transition-all duration-300 ${sidebar} ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -230,13 +249,15 @@ export default function AppLayout() {
       >
         {/* Header */}
        <header
-  className={`sticky top-0 z-20 flex min-h-[72px] items-center justify-between gap-3 overflow-x-auto border-b px-4 shadow-sm backdrop-blur-2xl md:px-8 transition-colors duration-300 ${header}`}
+  className={`sticky top-0 z-40 flex min-h-[72px] items-center justify-between gap-3 overflow-hidden border-b px-4 shadow-sm backdrop-blur-2xl md:px-8 transition-colors duration-300 ${header}`}
 >
   <div className="flex min-w-0 items-center gap-4">
     <button
       type="button"
       onClick={() => setSidebarOpen((prev) => !prev)}
-      className={`shrink-0 rounded-lg p-2 transition-colors ${iconBtn} hover:bg-white/10`}
+      aria-label={sidebarOpen ? 'Tutup sidebar' : 'Buka sidebar'}
+      aria-expanded={sidebarOpen}
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${iconBtn} hover:bg-white/10 active:bg-cyan-400/10`}
     >
       <Menu size={20} />
     </button>
@@ -248,10 +269,10 @@ export default function AppLayout() {
     </div>
   </div>
 
-  <div className="flex shrink-0 items-center gap-2">
+  <div className="flex min-w-0 shrink items-center justify-end gap-2">
     {/* Jam Realtime + Label Sistem */}
     <div
-      className={`flex scale-[0.78] origin-right items-center gap-3 rounded-xl border px-4 py-2 transition-colors sm:scale-100 ${
+      className={`flex max-w-[calc(100vw-88px)] scale-[0.78] origin-right items-center gap-3 overflow-hidden rounded-xl border px-4 py-2 transition-colors sm:max-w-none sm:scale-100 ${
         isDark
           ? 'border-cyan-800/50 bg-slate-800/60'
           : 'border-cyan-200/80 bg-white/60'

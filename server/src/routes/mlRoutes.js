@@ -2,54 +2,11 @@ import express from "express";
 import multer from "multer";
 
 const router = express.Router();
-const ML_API_URL = process.env.ML_API_URL || "http://localhost:5001";
+const ML_API_URL = process.env.ML_API_URL || "http://127.0.0.1:5001";
 
 const upload = multer({
   storage: multer.memoryStorage(),
 });
-
-function createFallbackAnalysis(file) {
-  const seed = file.size + file.originalname.length;
-  const motorcycle = (seed % 28) + 12;
-  const car = (Math.floor(seed / 3) % 24) + 8;
-  const bus = (Math.floor(seed / 5) % 6) + 1;
-  const truck = (Math.floor(seed / 7) % 8) + 1;
-  const total = motorcycle + car + bus + truck;
-  const totalSmp = motorcycle * 0.5 + car + bus * 1.3 + truck * 1.3;
-
-  let status = "LANCAR";
-  if (totalSmp >= 25) status = "MACET";
-  else if (totalSmp >= 15) status = "PADAT";
-
-  const advice =
-    status === "MACET"
-      ? "Kepadatan tinggi terdeteksi. Pertimbangkan pengalihan arus dan optimasi durasi lampu hijau."
-      : status === "PADAT"
-        ? "Lalu lintas terpantau padat. Pantau antrean kendaraan dan siapkan jalur alternatif bila perlu."
-        : "Lalu lintas terpantau lancar. Pertahankan pola pengaturan saat ini.";
-
-  return {
-    status: "success",
-    mode: "fallback",
-    message: "Analisis estimasi berhasil dibuat.",
-    data: {
-      total_kendaraan: total,
-      rincian: {
-        Motorcycle: motorcycle,
-        Car: car,
-        Bus: bus,
-        Truck: truck,
-      },
-      kemacetan: {
-        status,
-        total_smp: Number(totalSmp.toFixed(1)),
-      },
-      garis_y_dipakai: null,
-      tipe_file: file.mimetype.startsWith("video/") ? "video" : "image",
-      pesan_ai_advisor: advice,
-    },
-  };
-}
 
 router.post("/predict", upload.single("file"), async (req, res) => {
   try {
@@ -81,7 +38,11 @@ router.post("/predict", upload.single("file"), async (req, res) => {
 
     return res.status(response.status).json(data);
   } catch (error) {
-    return res.json(createFallbackAnalysis(req.file));
+    return res.status(503).json({
+      status: "error",
+      message:
+        "AI Python belum aktif atau tidak dapat dijangkau. Jalankan FastAPI ML agar prediksi kendaraan memakai model YOLO.",
+    });
   }
 });
 

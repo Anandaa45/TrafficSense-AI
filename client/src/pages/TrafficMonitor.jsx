@@ -57,7 +57,7 @@ export default function TrafficMonitor() {
     return 'lancar';
   }
 
-  async function extractFrame(file) {
+  async function extractFrame(file, seekRatio = 0.15) {
     const url = URL.createObjectURL(file);
     const canvas = document.createElement('canvas');
     canvas.width = FRAME_WIDTH;
@@ -78,7 +78,12 @@ export default function TrafficMonitor() {
         });
 
         if (Number.isFinite(video.duration) && video.duration > 1) {
-          video.currentTime = Math.min(1, video.duration * 0.15);
+          const targetTime = Math.min(
+            Math.max(0.1, video.duration * seekRatio),
+            Math.max(0.1, video.duration - 0.1),
+          );
+
+          video.currentTime = targetTime;
           await new Promise((resolve) => {
             video.onseeked = resolve;
             setTimeout(resolve, 800);
@@ -107,6 +112,8 @@ export default function TrafficMonitor() {
   function getPixelStats(imageData) {
     const { data, width, height } = imageData;
     let roadLike = 0;
+    let darkRoadLike = 0;
+    let roadMarkings = 0;
     let brightLights = 0;
     let lowerPixels = 0;
     let edgePixels = 0;
@@ -130,12 +137,20 @@ export default function TrafficMonitor() {
         if (isLowerHalf) {
           lowerPixels += 1;
 
-          if (saturation < 0.28 && luma > 18 && luma < 185) {
+          if (saturation < 0.5 && luma > 10 && luma < 220 && max - min < 105) {
             roadLike += 1;
+          }
+
+          if (saturation < 0.55 && luma > 12 && luma < 95) {
+            darkRoadLike += 1;
+          }
+
+          if (saturation < 0.38 && luma > 135) {
+            roadMarkings += 1;
           }
         }
 
-        if (luma > 185 && saturation < 0.45 && y > height * 0.2) {
+        if (luma > 170 && saturation < 0.5 && y > height * 0.18) {
           brightLights += 1;
         }
 
@@ -158,22 +173,39 @@ export default function TrafficMonitor() {
 
     return {
       roadRatio: lowerPixels ? roadLike / lowerPixels : 0,
+      darkRoadRatio: lowerPixels ? darkRoadLike / lowerPixels : 0,
+      markingRatio: lowerPixels ? roadMarkings / lowerPixels : 0,
       lightRatio: sampled ? brightLights / sampled : 0,
       edgeRatio: sampled ? edgePixels / sampled : 0,
       posterRatio: sampled ? saturatedPosterPixels / sampled : 0,
     };
   }
 
+  function looksLikeTraffic(stats) {
+    const roadAndEdges = stats.roadRatio > 0.2 && stats.edgeRatio > 0.018;
+    const roadWithMarkings = stats.markingRatio > 0.012 && stats.edgeRatio > 0.014;
+    const nightTraffic = stats.darkRoadRatio > 0.12 && (stats.lightRatio > 0.002 || stats.markingRatio > 0.006) && stats.edgeRatio > 0.012;
+
+    return roadAndEdges || roadWithMarkings || nightTraffic;
+  }
+
+  function looksLikePoster(stats) {
+    return stats.posterRatio > 0.3 && stats.roadRatio < 0.14 && stats.markingRatio < 0.004;
+  }
+
   async function validateTrafficMedia(file) {
-    const frame = await extractFrame(file);
-    const stats = getPixelStats(frame);
-    const roadAndEdges = stats.roadRatio > 0.28 && stats.edgeRatio > 0.035;
-    const nightTraffic = stats.roadRatio > 0.18 && stats.lightRatio > 0.006 && stats.edgeRatio > 0.025;
-    const likelyPoster = stats.posterRatio > 0.22 && stats.roadRatio < 0.18;
+    const seekRatios = file.type?.startsWith('video/') ? [0.12, 0.45, 0.75] : [0.15];
+    const statsList = [];
+
+    for (const ratio of seekRatios) {
+      const frame = await extractFrame(file, ratio);
+      statsList.push(getPixelStats(frame));
+    }
 
     return {
-      ok: !likelyPoster && (roadAndEdges || nightTraffic),
-      stats,
+      ok: statsList.some(looksLikeTraffic) && !statsList.every(looksLikePoster),
+      stats: statsList[0],
+      statsList,
     };
   }
 
@@ -193,10 +225,13 @@ export default function TrafficMonitor() {
       mediaType: file.type?.startsWith('video/') ? 'video' : 'image',
       analyzedAt: new Date().toISOString(),
       totalVehicles: total,
-      confidence: totalSmp,
+      totalSmp,
+      aiConfidence: null,
+      confidence: null,
+      analysisMode: 'estimate',
       status: getTrafficStatus(total),
       vehicleTypes: { motor, car, bus, truck },
-      advice: 'Analisis selesai. Gunakan hasil ini sebagai estimasi awal kondisi lalu lintas.',
+      advice: 'Mode estimasi browser aktif karena API AI belum terhubung. Untuk akurasi model, jalankan FastAPI ML lalu analisis ulang media ini.',
     };
   }
 
@@ -218,13 +253,6 @@ export default function TrafficMonitor() {
       return;
     }
 
-    if (!validation.ok) {
-      setAnalysisResult(null);
-      setError('Media ditolak. Sistem hanya menerima foto/video yang terlihat seperti lalu lintas jalan, CCTV jalan, antrean kendaraan, atau rekaman jalan.');
-      setAnalyzing(false);
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append('file', mediaFile);
@@ -233,6 +261,14 @@ export default function TrafficMonitor() {
       const data = response.data || {};
       const rincian = data.rincian || {};
       const total = Number(data.total_kendaraan || 0);
+      const totalSmp = data.kemacetan?.total_smp ?? '-';
+      const aiConfidence = Number(data.avg_confidence ?? data.confidence ?? 0);
+
+      if (total === 0 && !validation.ok) {
+        setAnalysisResult(null);
+        setError('Media ditolak. Sistem hanya menerima foto/video lalu lintas jalan, CCTV jalan, antrean kendaraan, atau rekaman jalan.');
+        return;
+      }
 
       const result = {
         id: Date.now(),
@@ -241,7 +277,13 @@ export default function TrafficMonitor() {
         mediaType: isVideo ? 'video' : 'image',
         analyzedAt: new Date().toISOString(),
         totalVehicles: total,
-        confidence: data.kemacetan?.total_smp ?? '-',
+        totalSmp,
+        aiConfidence: Number.isFinite(aiConfidence) ? aiConfidence : 0,
+        confidence: Number.isFinite(aiConfidence) ? aiConfidence : 0,
+        confidenceThreshold: data.confidence_threshold ?? null,
+        sampledFrames: data.sampled_frames ?? null,
+        detectionCount: data.detection_count ?? null,
+        analysisMode: data.model_mode || 'ai',
         status: (data.kemacetan?.status || getTrafficStatus(total)).toLowerCase(),
         vehicleTypes: {
           motor: Number(rincian.Motorcycle || 0),
@@ -258,6 +300,13 @@ export default function TrafficMonitor() {
       setHistory(nextHistory);
     } catch (err) {
       console.error(err);
+
+      if (!validation.ok) {
+        setAnalysisResult(null);
+        setError('Media ditolak. Sistem hanya menerima foto/video lalu lintas jalan, CCTV jalan, antrean kendaraan, atau rekaman jalan.');
+        return;
+      }
+
       const result = createClientFallbackResult(mediaFile);
       const nextHistory = await saveAnalysis(result, mediaFile);
 
@@ -332,9 +381,17 @@ export default function TrafficMonitor() {
   }
 
   function statusClass(status) {
-    if (status === 'macet') return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
-    if (status === 'padat') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+    const normalizedStatus = String(status || '').toLowerCase();
+
+    if (normalizedStatus === 'macet') return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+    if (normalizedStatus === 'padat') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
     return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+  }
+
+  function formatConfidence(item) {
+    if (!item || item.analysisMode === 'estimate') return 'Estimasi';
+    if (item.aiConfidence === null || item.aiConfidence === undefined) return '-';
+    return `${item.aiConfidence}%`;
   }
 
   const panelClass = isDark
@@ -351,6 +408,9 @@ export default function TrafficMonitor() {
   const resultCardClass = isDark
     ? 'border-white/10 bg-white/5'
     : 'border-slate-200 bg-white';
+  const adviceClass = isDark
+    ? 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100'
+    : 'border-cyan-300 bg-cyan-50 text-cyan-800';
 
   return (
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
@@ -544,11 +604,18 @@ export default function TrafficMonitor() {
               <div className={`rounded-3xl border p-5 ${resultCardClass}`}>
                 <p className={`text-sm ${mutedText}`}>Total SMP</p>
                 <p className="mt-2 text-4xl font-extrabold text-cyan-400">
-                  {analysisResult.confidence}
+                  {analysisResult.totalSmp ?? '-'}
                 </p>
               </div>
 
               <div className={`rounded-3xl border p-5 ${resultCardClass}`}>
+                <p className={`text-sm ${mutedText}`}>Confidence AI</p>
+                <p className="mt-2 text-3xl font-extrabold text-cyan-400">
+                  {formatConfidence(analysisResult)}
+                </p>
+              </div>
+
+              <div className={`rounded-3xl border p-5 lg:col-span-4 ${resultCardClass}`}>
                 <p className={`text-sm ${mutedText}`}>Status</p>
                 <span className={`mt-3 inline-flex rounded-full border px-4 py-2 text-sm font-extrabold uppercase ${statusClass(analysisResult.status)}`}>
                   {analysisResult.status}
@@ -564,7 +631,7 @@ export default function TrafficMonitor() {
                   {analysisResult.fileName}
                 </p>
                 {analysisResult.advice && (
-                  <p className="mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm font-semibold leading-6 text-cyan-100">
+                  <p className={`mt-4 rounded-2xl border p-4 text-sm font-semibold leading-6 ${adviceClass}`}>
                     {analysisResult.advice}
                   </p>
                 )}

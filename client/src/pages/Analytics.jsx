@@ -49,9 +49,17 @@ export default function Analytics() {
   }
 
   function statusClass(status) {
-    if (status === 'macet') return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
-    if (status === 'padat') return 'text-amber-300 bg-amber-500/10 border-amber-500/30';
+    const normalizedStatus = String(status || '').toLowerCase();
+
+    if (normalizedStatus === 'macet') return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
+    if (normalizedStatus === 'padat') return 'text-amber-300 bg-amber-500/10 border-amber-500/30';
     return 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30';
+  }
+
+  function formatConfidence(item) {
+    if (!item || item.analysisMode === 'estimate') return 'Estimasi';
+    if (item.aiConfidence === null || item.aiConfidence === undefined) return '-';
+    return `${item.aiConfidence}%`;
   }
 
   async function openPreview(item) {
@@ -124,7 +132,8 @@ export default function Analytics() {
                 <th className="font-bold">File</th>
                 <th className="font-bold">Tipe</th>
                 <th className="font-bold">Total</th>
-                <th className="font-bold">Confidence</th>
+                <th className="font-bold">Total SMP</th>
+                <th className="font-bold">Confidence AI</th>
                 <th className="font-bold">Status</th>
                 <th className="font-bold">Preview</th>
               </tr>
@@ -150,7 +159,11 @@ export default function Analytics() {
                   </td>
 
                   <td className={bodyText}>
-                    {item.confidence}%
+                    {item.totalSmp ?? '-'}
+                  </td>
+
+                  <td className={bodyText}>
+                    {formatConfidence(item)}
                   </td>
 
                   <td>
@@ -174,7 +187,7 @@ export default function Analytics() {
 
               {history.length === 0 && (
                 <tr>
-                  <td colSpan="7" className={`py-12 text-center ${mutedText}`}>
+                  <td colSpan="8" className={`py-12 text-center ${mutedText}`}>
                     <Activity size={42} className="mx-auto mb-3 text-cyan-400" />
                     Belum ada riwayat analisis. Upload media dari halaman Traffic Monitor.
                   </td>
@@ -191,13 +204,14 @@ export default function Analytics() {
           onClose={() => setPreviewItem(null)}
           statusClass={statusClass}
           isDark={isDark}
+          formatConfidence={formatConfidence}
         />
       )}
     </>
   );
 }
 
-function MediaPreviewModal({ item, onClose, statusClass, isDark }) {
+function MediaPreviewModal({ item, onClose, statusClass, isDark, formatConfidence }) {
   const vehicles = item.vehicleTypes || {};
   const modalClass = isDark
     ? 'border-white/10 bg-[#0b1228] text-white'
@@ -213,8 +227,8 @@ function MediaPreviewModal({ item, onClose, statusClass, isDark }) {
     : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md">
-      <div className={`w-full max-w-4xl rounded-3xl border p-5 shadow-2xl ${modalClass}`}>
+    <div className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-black/70 p-3 backdrop-blur-md sm:p-5">
+      <div className={`my-4 max-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-y-auto rounded-3xl border p-4 shadow-2xl sm:p-5 ${modalClass}`}>
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
             <h3 className={`text-lg font-extrabold ${titleClass}`}>
@@ -234,28 +248,35 @@ function MediaPreviewModal({ item, onClose, statusClass, isDark }) {
           </button>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[1.3fr_0.9fr]">
-          <div className="flex max-h-[55vh] items-center justify-center overflow-hidden rounded-2xl bg-black/40">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_360px]">
+          <div className="flex min-h-[260px] items-center justify-center overflow-hidden rounded-2xl bg-black/50">
             {item.mediaType === 'video' ? (
               <video
                 src={item.mediaUrl}
                 controls
-                className="max-h-[55vh] w-full object-contain"
+                className="max-h-[72dvh] w-full object-contain"
               />
             ) : (
               <img
                 src={item.mediaUrl}
                 alt={item.fileName}
-                className="max-h-[55vh] w-full object-contain"
+                className="max-h-[72dvh] w-full object-contain"
               />
             )}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 xl:max-h-[72dvh] xl:overflow-y-auto xl:pr-1">
             <div className={`rounded-2xl border p-4 ${panelClass}`}>
               <p className={`text-sm ${mutedClass}`}>Total Kendaraan</p>
               <p className={`mt-2 text-4xl font-extrabold ${valueClass}`}>
                 {item.totalVehicles}
+              </p>
+            </div>
+
+            <div className={`rounded-2xl border p-4 ${panelClass}`}>
+              <p className={`text-sm ${mutedClass}`}>Total SMP</p>
+              <p className={`mt-2 text-3xl font-extrabold ${valueClass}`}>
+                {item.totalSmp ?? '-'}
               </p>
             </div>
 
@@ -269,10 +290,10 @@ function MediaPreviewModal({ item, onClose, statusClass, isDark }) {
             <div className={`rounded-2xl border p-4 ${panelClass}`}>
               <div className={`flex items-center gap-2 ${mutedClass}`}>
                 <Gauge size={17} />
-                <p className="text-sm">Confidence</p>
+                <p className="text-sm">Confidence AI</p>
               </div>
               <p className="mt-2 text-3xl font-extrabold text-cyan-400">
-                {item.confidence}%
+                {formatConfidence(item)}
               </p>
             </div>
 
