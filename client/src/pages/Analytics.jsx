@@ -12,11 +12,14 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../Context/ThemeContext.jsx';
 import { getMediaUrl } from '../lib/analysisStorage.js';
+import { useLanguage } from '../Context/LanguageContext.jsx';
 
 const HISTORY_KEY = 'trafficSense_analysis_history';
 
 export default function Analytics() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+  const a = t.analyticsPage || {};
   const [previewItem, setPreviewItem] = useState(null);
   const [previewError, setPreviewError] = useState('');
 
@@ -89,11 +92,11 @@ export default function Analytics() {
           <div>
             <h3 className={`flex items-center gap-2 text-2xl font-extrabold ${titleText}`}>
               <BarChart3 size={22} className="text-cyan-400" />
-              Riwayat Analisis
+              {a.analysisHistory}
             </h3>
 
             <p className={`mt-1 text-sm ${mutedText}`}>
-              Semua hasil analisis foto dan video yang pernah di-upload.
+              {a.analysisHistorySub}
             </p>
           </div>
 

@@ -250,7 +250,7 @@ function Akun({
             >
               <option value="id">Bahasa Indonesia</option>
               <option value="en">English (US)</option>
-              <option value="en-uk">English (UK)</option>
+
             </select>
           </div>
 
