@@ -30,7 +30,7 @@ export default function AppLayout() {
   const { currentTZ } = useTimezone();
   const { dateFormat } = useDateFormat();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
 
   const [now, setNow] = useState(() => new Date());
 

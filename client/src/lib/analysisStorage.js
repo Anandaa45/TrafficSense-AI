@@ -17,19 +17,27 @@ function openDB() {
 }
 
 export async function saveAnalysis(result, file) {
-  const db = await openDB();
+  let hasMediaBlob = false;
 
-  await new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(file, String(result.id));
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    const db = await openDB();
+
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put(file, String(result.id));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+
+    hasMediaBlob = true;
+  } catch (error) {
+    console.warn('Media preview storage unavailable:', error);
+  }
 
   const safeResult = {
     ...result,
     mediaUrl: null,
-    hasMediaBlob: true,
+    hasMediaBlob,
   };
 
   const oldHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
@@ -42,7 +50,13 @@ export async function saveAnalysis(result, file) {
 }
 
 export async function getMediaUrl(id) {
-  const db = await openDB();
+  let db;
+
+  try {
+    db = await openDB();
+  } catch {
+    return null;
+  }
 
   const blob = await new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
@@ -58,14 +72,20 @@ export async function getMediaUrl(id) {
 }
 
 export async function deleteAnalysis(id) {
-  const db = await openDB();
+  let db;
 
-  await new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(String(id));
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
+  try {
+    db = await openDB();
+
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(String(id));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.warn('Media preview deletion skipped:', error);
+  }
 
   const oldHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
   const newHistory = oldHistory.filter((item) => item.id !== id);

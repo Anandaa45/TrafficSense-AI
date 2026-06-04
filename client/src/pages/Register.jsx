@@ -9,6 +9,7 @@ import {
   User,
 } from 'lucide-react';
 import { api } from '../lib/api.js';
+import { registerLocalUser } from '../lib/localAuth.js';
 
 const initialForm = {
   username: '',
@@ -46,12 +47,18 @@ export default function Register() {
     try {
       setLoading(true);
 
-      await api.post('/auth/register', {
+      const payload = {
         username: form.username,
         email: form.email,
         role: form.role,
         password: form.password,
-      });
+      };
+
+      try {
+        await api.post('/auth/register', payload);
+      } catch {
+        registerLocalUser(payload);
+      }
 
       navigate('/login');
     } catch (err) {

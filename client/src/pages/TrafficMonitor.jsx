@@ -14,11 +14,13 @@ import {
   Activity,
 } from 'lucide-react';
 import { useLanguage } from '../Context/LanguageContext.jsx';
+import { useTheme } from '../Context/ThemeContext.jsx';
 import { apiPostForm } from '../lib/api.js';
-import { saveAnalysis, deleteAnalysis, getAnalysisHistory } from '../lib/analysisStorage.js';
+import { saveAnalysis, deleteAnalysis, getAnalysisHistory, getMediaUrl } from '../lib/analysisStorage.js';
 
 export default function TrafficMonitor() {
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const tm = t.trafficMonitorPage || {};
 
   const [mediaFile, setMediaFile] = useState(null);
@@ -136,6 +138,28 @@ export default function TrafficMonitor() {
     setError('');
   }
 
+  async function handleSelectHistory(item) {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setMediaFile(null);
+    setAnalysisResult(item);
+    setError('');
+
+    if (!item.hasMediaBlob) {
+      setPreviewUrl('');
+      return;
+    }
+
+    const mediaUrl = await getMediaUrl(item.id);
+    setPreviewUrl(mediaUrl || '');
+
+    if (!mediaUrl) {
+      setError('Preview media tidak ditemukan, tetapi data analisis masih tersimpan.');
+    }
+  }
+
   async function handleDeleteAnalysis() {
     if (!analysisResult) return;
 
@@ -144,8 +168,14 @@ export default function TrafficMonitor() {
 
     try {
       const nextHistory = await deleteAnalysis(analysisResult.id);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
       setHistory(nextHistory);
       setAnalysisResult(null);
+      setMediaFile(null);
+      setPreviewUrl('');
     } catch (err) {
       console.error(err);
       setError('Gagal menghapus hasil analisis.');
@@ -165,21 +195,36 @@ export default function TrafficMonitor() {
     return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
   }
 
+  const panelClass = isDark
+    ? 'border-white/10 bg-white/5 text-white'
+    : 'border-slate-200 bg-white/80 text-slate-950 shadow-sm';
+  const mutedText = isDark ? 'text-slate-400' : 'text-slate-600';
+  const titleText = isDark ? 'text-white' : 'text-slate-950';
+  const previewClass = isDark
+    ? 'border-white/10 bg-[#071126]'
+    : 'border-slate-200 bg-white';
+  const historyClass = isDark
+    ? 'border-white/10 bg-white/5 hover:border-cyan-400/40 hover:bg-cyan-400/5'
+    : 'border-slate-200 bg-white/75 hover:border-cyan-300 hover:bg-cyan-50';
+  const resultCardClass = isDark
+    ? 'border-white/10 bg-white/5'
+    : 'border-slate-200 bg-white';
+
   return (
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
       <aside className="space-y-5">
-        <section className="panel p-5">
+        <section className={`rounded-3xl border p-5 ${panelClass}`}>
           <h3 className="text-lg font-extrabold">{tm.uploadMedia}</h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className={`mt-1 text-sm ${mutedText}`}>
             {tm.uploadMediaSub || 'Upload foto atau video lalu jalankan analisis kepadatan lalu lintas.'}
           </p>
 
-          <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-cyan-400/40 bg-cyan-400/5 px-4 py-8 text-center transition hover:bg-cyan-400/10">
+          <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-cyan-400/50 bg-cyan-400/10 px-4 py-8 text-center transition hover:bg-cyan-400/15">
             <UploadCloud size={36} className="text-cyan-400" />
-            <p className="mt-3 font-bold text-white">
+            <p className={`mt-3 font-bold ${titleText}`}>
               {tm.chooseMedia || 'Pilih Foto / Video'}
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className={`mt-1 text-xs ${mutedText}`}>
               {tm.supportedFiles || 'JPG, PNG, MP4, MOV'}
             </p>
             <input
@@ -191,7 +236,7 @@ export default function TrafficMonitor() {
           </label>
 
           {mediaFile && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className={`mt-4 rounded-2xl border p-4 ${resultCardClass}`}>
               <div className="flex items-start gap-3">
                 {isVideo ? (
                   <Video className="mt-1 text-cyan-400" size={20} />
@@ -200,8 +245,8 @@ export default function TrafficMonitor() {
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-white">{mediaFile.name}</p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className={`truncate font-bold ${titleText}`}>{mediaFile.name}</p>
+                  <p className={`mt-1 text-xs ${mutedText}`}>
                     {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
@@ -218,7 +263,7 @@ export default function TrafficMonitor() {
           )}
         </section>
 
-        <section className="panel p-5">
+        <section className={`rounded-3xl border p-5 ${panelClass}`}>
           <h3 className="text-lg font-extrabold">Hasil Upload</h3>
 
           <div className="mt-4 space-y-3">
@@ -231,8 +276,8 @@ export default function TrafficMonitor() {
             {history.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setAnalysisResult(item)}
-                className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-cyan-400/40 hover:bg-cyan-400/5"
+                onClick={() => handleSelectHistory(item)}
+                className={`w-full rounded-2xl border p-4 text-left transition ${historyClass}`}
               >
                 <div className="flex items-start gap-3">
                   {item.mediaType === 'video' ? (
@@ -242,8 +287,8 @@ export default function TrafficMonitor() {
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-white">{item.fileName}</p>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className={`truncate font-bold ${titleText}`}>{item.fileName}</p>
+                    <p className={`mt-1 text-xs ${mutedText}`}>
                       {formatDate(item.analyzedAt)}
                     </p>
                     <div className="mt-2 flex items-center justify-between">
@@ -263,11 +308,11 @@ export default function TrafficMonitor() {
       </aside>
 
       <main className="space-y-5">
-        <section className="panel overflow-hidden p-5">
+        <section className={`rounded-3xl border p-5 ${panelClass}`}>
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-extrabold">Preview Media</h3>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className={`mt-1 text-sm ${mutedText}`}>
                 Media yang di-upload akan tampil di sini sebelum dianalisis.
               </p>
             </div>
@@ -292,14 +337,14 @@ export default function TrafficMonitor() {
             </div>
           )}
 
-          <div className="relative flex min-h-[430px] items-center justify-center overflow-hidden rounded-[28px] border border-white/10 bg-[#071126]">
+          <div className={`relative flex min-h-[430px] items-center justify-center overflow-hidden rounded-[28px] border ${previewClass}`}>
             {!previewUrl && (
               <div className="px-6 text-center">
                 <UploadCloud size={56} className="mx-auto text-cyan-400" />
-                <h4 className="mt-4 text-2xl font-extrabold text-white">
+                <h4 className={`mt-4 text-2xl font-extrabold ${titleText}`}>
                   Belum ada media dipilih
                 </h4>
-                <p className="mt-2 text-sm text-slate-400">
+                <p className={`mt-2 text-sm ${mutedText}`}>
                   Upload foto atau video dari panel kiri untuk mulai analisis.
                 </p>
               </div>
@@ -328,52 +373,52 @@ export default function TrafficMonitor() {
           </div>
         </section>
 
-        <section className="panel p-5">
+        <section className={`rounded-3xl border p-5 ${panelClass}`}>
           <div className="mb-4 flex items-center gap-2">
             <FileCheck size={20} className="text-cyan-400" />
             <h3 className="text-xl font-extrabold">Hasil Analisis</h3>
           </div>
 
           {!analysisResult && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-slate-500">
+            <div className={`rounded-2xl border p-8 text-center ${mutedText} ${resultCardClass}`}>
               Belum ada hasil. Upload media lalu klik tombol Analisis AI.
             </div>
           )}
 
           {analysisResult && (
             <div className="grid gap-4 lg:grid-cols-4">
-              <ResultCard icon={<Car size={22} />} label="Mobil" value={analysisResult.vehicleTypes.car} />
-              <ResultCard icon={<Bike size={22} />} label="Motor" value={analysisResult.vehicleTypes.motor} />
-              <ResultCard icon={<Bus size={22} />} label="Bus" value={analysisResult.vehicleTypes.bus} />
-              <ResultCard icon={<Truck size={22} />} label="Truk" value={analysisResult.vehicleTypes.truck} />
+              <ResultCard icon={<Car size={22} />} label="Mobil" value={analysisResult.vehicleTypes.car} cardClass={resultCardClass} valueClass={titleText} />
+              <ResultCard icon={<Bike size={22} />} label="Motor" value={analysisResult.vehicleTypes.motor} cardClass={resultCardClass} valueClass={titleText} />
+              <ResultCard icon={<Bus size={22} />} label="Bus" value={analysisResult.vehicleTypes.bus} cardClass={resultCardClass} valueClass={titleText} />
+              <ResultCard icon={<Truck size={22} />} label="Truk" value={analysisResult.vehicleTypes.truck} cardClass={resultCardClass} valueClass={titleText} />
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5 lg:col-span-2">
-                <p className="text-sm text-slate-400">Total Kendaraan</p>
-                <p className="mt-2 text-4xl font-extrabold text-white">
+              <div className={`rounded-3xl border p-5 lg:col-span-2 ${resultCardClass}`}>
+                <p className={`text-sm ${mutedText}`}>Total Kendaraan</p>
+                <p className={`mt-2 text-4xl font-extrabold ${titleText}`}>
                   {analysisResult.totalVehicles}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <p className="text-sm text-slate-400">Total SMP</p>
+              <div className={`rounded-3xl border p-5 ${resultCardClass}`}>
+                <p className={`text-sm ${mutedText}`}>Total SMP</p>
                 <p className="mt-2 text-4xl font-extrabold text-cyan-400">
                   {analysisResult.confidence}
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <p className="text-sm text-slate-400">Status</p>
+              <div className={`rounded-3xl border p-5 ${resultCardClass}`}>
+                <p className={`text-sm ${mutedText}`}>Status</p>
                 <span className={`mt-3 inline-flex rounded-full border px-4 py-2 text-sm font-extrabold uppercase ${statusClass(analysisResult.status)}`}>
                   {analysisResult.status}
                 </span>
               </div>
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5 lg:col-span-4">
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+              <div className={`rounded-3xl border p-5 lg:col-span-4 ${resultCardClass}`}>
+                <div className={`flex items-center gap-2 text-sm ${mutedText}`}>
                   <Clock size={15} />
                   Dianalisis pada {formatDate(analysisResult.analyzedAt)}
                 </div>
-                <p className="mt-2 truncate font-bold text-white">
+                <p className={`mt-2 truncate font-bold ${titleText}`}>
                   {analysisResult.fileName}
                 </p>
                 {analysisResult.advice && (
@@ -399,15 +444,15 @@ export default function TrafficMonitor() {
   );
 }
 
-function ResultCard({ icon, label, value }) {
+function ResultCard({ icon, label, value, cardClass, valueClass }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+    <div className={`rounded-3xl border p-5 ${cardClass}`}>
       <div className="flex items-center gap-3 text-cyan-400">
         {icon}
         <p className="font-bold">{label}</p>
       </div>
 
-      <p className="mt-4 text-4xl font-extrabold text-white">{value}</p>
+      <p className={`mt-4 text-4xl font-extrabold ${valueClass}`}>{value}</p>
     </div>
   );
 }

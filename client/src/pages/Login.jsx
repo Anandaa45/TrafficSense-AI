@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Activity, LogIn, Mail, Eye, EyeOff } from 'lucide-react';
 import { api } from '../lib/api.js';
+import { loginLocalUser } from '../lib/localAuth.js';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +17,14 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const result = await api.post('/auth/login', form);
+      let result;
+
+      try {
+        result = await api.post('/auth/login', form);
+      } catch {
+        result = loginLocalUser(form);
+      }
+
       localStorage.setItem('trafficSense_auth', JSON.stringify(result));
       navigate('/dashboard');
     } catch (err) {

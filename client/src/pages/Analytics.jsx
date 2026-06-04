@@ -190,31 +190,44 @@ export default function Analytics() {
           item={previewItem}
           onClose={() => setPreviewItem(null)}
           statusClass={statusClass}
+          isDark={isDark}
         />
       )}
     </>
   );
 }
 
-function MediaPreviewModal({ item, onClose, statusClass }) {
+function MediaPreviewModal({ item, onClose, statusClass, isDark }) {
   const vehicles = item.vehicleTypes || {};
+  const modalClass = isDark
+    ? 'border-white/10 bg-[#0b1228] text-white'
+    : 'border-slate-200 bg-white text-slate-950 shadow-slate-400/30';
+  const panelClass = isDark
+    ? 'border-white/10 bg-white/5'
+    : 'border-slate-200 bg-slate-50';
+  const titleClass = isDark ? 'text-white' : 'text-slate-950';
+  const mutedClass = isDark ? 'text-slate-400' : 'text-slate-500';
+  const valueClass = isDark ? 'text-white' : 'text-slate-950';
+  const closeClass = isDark
+    ? 'text-slate-400 hover:bg-white/10 hover:text-white'
+    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
-      <div className="w-full max-w-4xl rounded-3xl border border-white/10 bg-[#0b1228] p-5 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md">
+      <div className={`w-full max-w-4xl rounded-3xl border p-5 shadow-2xl ${modalClass}`}>
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <h3 className="text-lg font-extrabold text-white">
+            <h3 className={`text-lg font-extrabold ${titleClass}`}>
               Detail Hasil Analisis
             </h3>
-            <p className="mt-1 truncate text-sm text-slate-400">
+            <p className={`mt-1 truncate text-sm ${mutedClass}`}>
               {item.fileName}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white"
+            className={`rounded-xl p-2 ${closeClass}`}
             title="Tutup"
           >
             <X size={22} />
@@ -239,22 +252,22 @@ function MediaPreviewModal({ item, onClose, statusClass }) {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">Total Kendaraan</p>
-              <p className="mt-2 text-4xl font-extrabold text-white">
+            <div className={`rounded-2xl border p-4 ${panelClass}`}>
+              <p className={`text-sm ${mutedClass}`}>Total Kendaraan</p>
+              <p className={`mt-2 text-4xl font-extrabold ${valueClass}`}>
                 {item.totalVehicles}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <MiniStat icon={<Car size={18} />} label="Mobil" value={vehicles.car || 0} />
-              <MiniStat icon={<Bike size={18} />} label="Motor" value={vehicles.motor || 0} />
-              <MiniStat icon={<Bus size={18} />} label="Bus" value={vehicles.bus || 0} />
-              <MiniStat icon={<Truck size={18} />} label="Truk" value={vehicles.truck || 0} />
+              <MiniStat icon={<Car size={18} />} label="Mobil" value={vehicles.car || 0} panelClass={panelClass} valueClass={valueClass} />
+              <MiniStat icon={<Bike size={18} />} label="Motor" value={vehicles.motor || 0} panelClass={panelClass} valueClass={valueClass} />
+              <MiniStat icon={<Bus size={18} />} label="Bus" value={vehicles.bus || 0} panelClass={panelClass} valueClass={valueClass} />
+              <MiniStat icon={<Truck size={18} />} label="Truk" value={vehicles.truck || 0} panelClass={panelClass} valueClass={valueClass} />
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className={`rounded-2xl border p-4 ${panelClass}`}>
+              <div className={`flex items-center gap-2 ${mutedClass}`}>
                 <Gauge size={17} />
                 <p className="text-sm">Confidence</p>
               </div>
@@ -263,8 +276,8 @@ function MediaPreviewModal({ item, onClose, statusClass }) {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">Status Lalu Lintas</p>
+            <div className={`rounded-2xl border p-4 ${panelClass}`}>
+              <p className={`text-sm ${mutedClass}`}>Status Lalu Lintas</p>
               <span className={`mt-3 inline-flex rounded-full border px-4 py-2 text-sm font-extrabold uppercase ${statusClass(item.status)}`}>
                 {item.status}
               </span>
@@ -276,15 +289,15 @@ function MediaPreviewModal({ item, onClose, statusClass }) {
   );
 }
 
-function MiniStat({ icon, label, value }) {
+function MiniStat({ icon, label, value, panelClass, valueClass }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    <div className={`rounded-2xl border p-4 ${panelClass}`}>
       <div className="flex items-center gap-2 text-cyan-400">
         {icon}
         <p className="text-sm font-bold">{label}</p>
       </div>
 
-      <p className="mt-3 text-2xl font-extrabold text-white">
+      <p className={`mt-3 text-2xl font-extrabold ${valueClass}`}>
         {value}
       </p>
     </div>
