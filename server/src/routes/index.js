@@ -1,9 +1,25 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { pool } from '../db/pool.js';
 
 const router = Router();
 const PASSWORD_PREFIX = 'pbkdf2';
+const AUTH_STORE_PATH = path.resolve('data', 'auth-users.json');
+
+router.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'TrafficSense API berjalan',
+    endpoints: {
+      health: '/api/health',
+      register: '/api/auth/register',
+      login: '/api/auth/login',
+      mlPredict: '/api/ml/predict',
+    },
+  });
+});
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -21,6 +37,60 @@ function verifyPassword(password, storedPassword) {
   const stored = Buffer.from(storedHash, 'hex');
 
   return stored.length === hash.length && crypto.timingSafeEqual(stored, hash);
+}
+
+async function readLocalUsers() {
+  try {
+    const raw = await fs.readFile(AUTH_STORE_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+async function writeLocalUsers(users) {
+  await fs.mkdir(path.dirname(AUTH_STORE_PATH), { recursive: true });
+  await fs.writeFile(AUTH_STORE_PATH, JSON.stringify(users, null, 2));
+}
+
+async function registerLocalUser({ username, email, role, password }) {
+  const users = await readLocalUsers();
+  const normalizedEmail = email.toLowerCase();
+
+  if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
+    const error = new Error('Email sudah terdaftar.');
+    error.status = 409;
+    throw error;
+  }
+
+  const user = {
+    id: Date.now(),
+    username,
+    email,
+    role: role || 'Operator Lalu Lintas',
+    password: hashPassword(password),
+  };
+
+  users.push(user);
+  await writeLocalUsers(users);
+
+  const { password: hidden, ...safeUser } = user;
+  return safeUser;
+}
+
+async function loginLocalUser({ email, password }) {
+  const users = await readLocalUsers();
+  const user = users.find((item) => item.email.toLowerCase() === email.toLowerCase());
+
+  if (!user || !verifyPassword(password, user.password)) {
+    const error = new Error('Email atau password salah.');
+    error.status = 401;
+    throw error;
+  }
+
+  const { password: hidden, ...safeUser } = user;
+  return safeUser;
 }
 
 router.get('/health', async (req, res, next) => {
@@ -54,7 +124,19 @@ router.post('/auth/register', async (req, res, next) => {
 
     res.status(201).json({ message: 'Registrasi berhasil.', user: result.rows[0] });
   } catch (error) {
-    next(error);
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+
+    try {
+      const user = await registerLocalUser(req.body);
+      return res.status(201).json({
+        message: 'Registrasi berhasil. Data disimpan lokal karena database belum tersambung.',
+        user,
+      });
+    } catch (fallbackError) {
+      next(fallbackError);
+    }
   }
 });
 
@@ -86,7 +168,21 @@ router.post('/auth/login', async (req, res, next) => {
     const token = crypto.randomBytes(32).toString('hex');
     res.json({ message: 'Login berhasil.', token, user });
   } catch (error) {
-    next(error);
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+
+    try {
+      const user = await loginLocalUser(req.body);
+      const token = crypto.randomBytes(32).toString('hex');
+      return res.json({
+        message: 'Login berhasil. Data dibaca dari penyimpanan lokal.',
+        token,
+        user,
+      });
+    } catch (fallbackError) {
+      next(fallbackError);
+    }
   }
 });
 

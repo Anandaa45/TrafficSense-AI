@@ -9,6 +9,7 @@ client/dist/
 server/.env
 client/.env
 ml-api/.env
+server/data/
 
 venv/
 .venv/

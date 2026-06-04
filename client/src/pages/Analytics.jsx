@@ -11,12 +11,14 @@ import {
   Gauge,
 } from 'lucide-react';
 import { useTheme } from '../Context/ThemeContext.jsx';
+import { getMediaUrl } from '../lib/analysisStorage.js';
 
 const HISTORY_KEY = 'trafficSense_analysis_history';
 
 export default function Analytics() {
   const { isDark } = useTheme();
   const [previewItem, setPreviewItem] = useState(null);
+  const [previewError, setPreviewError] = useState('');
 
   const history = useMemo(() => {
     try {
@@ -49,13 +51,35 @@ export default function Analytics() {
     return 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30';
   }
 
-  function openPreview(item) {
-    if (!item?.mediaUrl) {
-      alert('Preview file belum tersedia. Silakan analisis ulang media dari Traffic Monitor.');
+  async function openPreview(item) {
+    setPreviewError('');
+
+    if (!item?.mediaUrl && !item?.hasMediaBlob) {
+      setPreviewError('Preview file belum tersedia. Silakan analisis ulang media dari Traffic Monitor.');
       return;
     }
 
-    setPreviewItem(item);
+    if (item.mediaUrl) {
+      setPreviewItem(item);
+      return;
+    }
+
+    try {
+      const mediaUrl = await getMediaUrl(item.id);
+
+      if (!mediaUrl) {
+        setPreviewError('File preview tidak ditemukan. Silakan analisis ulang media dari Traffic Monitor.');
+        return;
+      }
+
+      setPreviewItem({
+        ...item,
+        mediaUrl,
+      });
+    } catch (error) {
+      console.error(error);
+      setPreviewError('Gagal membuka preview media.');
+    }
   }
 
   return (
@@ -84,6 +108,12 @@ export default function Analytics() {
         </div>
 
         <div className="overflow-x-auto">
+          {previewError && (
+            <div className="mb-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-bold text-rose-300">
+              {previewError}
+            </div>
+          )}
+
           <table className="min-w-full text-left text-sm">
             <thead className={mutedText}>
               <tr>
@@ -129,7 +159,7 @@ export default function Analytics() {
                   <td>
                     <button
                       onClick={() => openPreview(item)}
-                      disabled={!item.mediaUrl}
+                      disabled={!item.mediaUrl && !item.hasMediaBlob}
                       className="inline-flex items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-2 text-cyan-400 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-40"
                       title="Lihat detail analisis"
                     >

@@ -3,11 +3,20 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:5000/api';
 
+async function getErrorMessage(response, fallback) {
+  try {
+    const data = await response.json();
+    return data.message || data.error || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function apiGet(path) {
   const response = await fetch(`${API_BASE_URL}${path}`);
 
   if (!response.ok) {
-    throw new Error('Gagal mengambil data dari server');
+    throw new Error(await getErrorMessage(response, 'Gagal mengambil data dari server'));
   }
 
   return response.json();
@@ -23,7 +32,7 @@ export async function apiPost(path, payload) {
   });
 
   if (!response.ok) {
-    throw new Error('Gagal mengirim data ke server');
+    throw new Error(await getErrorMessage(response, 'Gagal mengirim data ke server'));
   }
 
   return response.json();
@@ -36,7 +45,7 @@ export async function apiPostForm(path, formData) {
   });
 
   if (!response.ok) {
-    throw new Error('Gagal mengirim file ke server');
+    throw new Error(await getErrorMessage(response, 'Gagal mengirim file ke server'));
   }
 
   const data = await response.json();
