@@ -11,6 +11,10 @@ import TrafficMonitor from './pages/TrafficMonitor.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Settings from './pages/Settings.jsx';
 import Profile from './pages/Profile.jsx';
+import Incidents from './pages/Incidents.jsx';
+import Intersections from './pages/Intersections.jsx';
+import Recommendations from './pages/Recommendations.jsx';
+import Sessions from './pages/Sessions.jsx';
 
 import { LanguageProvider } from './Context/LanguageContext.jsx';
 import { ThemeProvider } from './Context/ThemeContext.jsx';
@@ -36,6 +40,10 @@ createRoot(document.getElementById('root')).render(
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/monitor" element={<TrafficMonitor />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/intersections" element={<Intersections />} />
+              <Route path="/incidents" element={<Incidents />} />
+              <Route path="/recommendations" element={<Recommendations />} />
+              <Route path="/sessions" element={<Sessions />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profile" element={<Profile />} />
             </Route>

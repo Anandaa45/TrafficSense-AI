@@ -14,6 +14,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { useLanguage } from '../Context/LanguageContext.jsx';
+import { apiPostForm } from '../lib/api.js';
 
 const STORAGE_KEY = 'trafficSense_latest_analysis';
 const HISTORY_KEY = 'trafficSense_analysis_history';
@@ -26,6 +27,7 @@ export default function TrafficMonitor() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState('');
   const [history, setHistory] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
@@ -49,6 +51,7 @@ export default function TrafficMonitor() {
     setMediaFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setAnalysisResult(null);
+    setError('');
   }
 
   function getTrafficStatus(total) {
@@ -57,44 +60,54 @@ export default function TrafficMonitor() {
     return 'lancar';
   }
 
-async function handleAnalyze() {
-  if (!mediaFile) return;
+  async function handleAnalyze() {
+    if (!mediaFile) return;
 
-  setAnalyzing(true);
+    setAnalyzing(true);
+    setError('');
 
-  const mediaUrl = await fileToDataUrl(mediaFile);
+    try {
+      const mediaUrl = await fileToDataUrl(mediaFile);
+      const formData = new FormData();
+      formData.append('file', mediaFile);
 
-  setTimeout(() => {
-    const motor = Math.floor(Math.random() * 45) + 20;
-    const car = Math.floor(Math.random() * 35) + 15;
-    const bus = Math.floor(Math.random() * 8) + 1;
-    const truck = Math.floor(Math.random() * 10) + 2;
-    const total = motor + car + bus + truck;
+      const response = await apiPostForm('/ml/predict', formData);
+      const data = response.data || {};
+      const rincian = data.rincian || {};
+      const total = Number(data.total_kendaraan || 0);
 
-    const result = {
-      id: Date.now(),
-      fileName: mediaFile.name,
-      fileType: mediaFile.type,
-      mediaType: isVideo ? 'video' : 'image',
-      mediaUrl,
-      analyzedAt: new Date().toISOString(),
-      totalVehicles: total,
-      confidence: Number((Math.random() * 5 + 93).toFixed(1)),
-      status: getTrafficStatus(total),
-      vehicleTypes: { motor, car, bus, truck },
-    };
+      const result = {
+        id: Date.now(),
+        fileName: mediaFile.name,
+        fileType: mediaFile.type,
+        mediaType: isVideo ? 'video' : 'image',
+        mediaUrl,
+        analyzedAt: new Date().toISOString(),
+        totalVehicles: total,
+        confidence: data.kemacetan?.total_smp ?? '-',
+        status: (data.kemacetan?.status || getTrafficStatus(total)).toLowerCase(),
+        vehicleTypes: {
+          motor: Number(rincian.Motorcycle || 0),
+          car: Number(rincian.Car || 0),
+          bus: Number(rincian.Bus || 0),
+          truck: Number(rincian.Truck || 0),
+        },
+        advice: data.pesan_ai_advisor || '',
+      };
 
-    const nextHistory = [result, ...history].slice(0, 10);
+      const nextHistory = [result, ...history].slice(0, 10);
 
-    setAnalysisResult(result);
-    setHistory(nextHistory);
+      setAnalysisResult(result);
+      setHistory(nextHistory);
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-
-    setAnalyzing(false);
-  }, 1400);
-}
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+    } catch (err) {
+      setError(err.message || 'Analisis AI gagal. Pastikan backend dan ML API berjalan.');
+    } finally {
+      setAnalyzing(false);
+    }
+  }
 
   function handleClear() {
     if (previewUrl) {
@@ -104,6 +117,7 @@ async function handleAnalyze() {
     setMediaFile(null);
     setPreviewUrl('');
     setAnalysisResult(null);
+    setError('');
   }
 
    function handleDeleteAnalysis() {
@@ -274,6 +288,12 @@ async function handleAnalyze() {
             </button>
           </div>
 
+          {error && (
+            <div className="mb-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-bold text-rose-300">
+              {error}
+            </div>
+          )}
+
           <div className="relative flex min-h-[430px] items-center justify-center overflow-hidden rounded-[28px] border border-white/10 bg-[#071126]">
             {!previewUrl && (
               <div className="px-6 text-center">
@@ -357,9 +377,9 @@ async function handleAnalyze() {
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <p className="text-sm text-slate-400">Confidence</p>
+                <p className="text-sm text-slate-400">Total SMP</p>
                 <p className="mt-2 text-4xl font-extrabold text-cyan-400">
-                  {analysisResult.confidence}%
+                  {analysisResult.confidence}
                 </p>
               </div>
 
@@ -378,6 +398,11 @@ async function handleAnalyze() {
                 <p className="mt-2 truncate font-bold text-white">
                   {analysisResult.fileName}
                 </p>
+                {analysisResult.advice && (
+                  <p className="mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm font-semibold leading-6 text-cyan-100">
+                    {analysisResult.advice}
+                  </p>
+                )}
               </div>
               
               <div className="lg:col-span-4">

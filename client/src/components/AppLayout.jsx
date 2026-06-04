@@ -6,9 +6,12 @@ import { useTimezone } from '../Context/TimezoneContext.jsx';
 import { useDateFormat } from '../Context/DateFormatContext.jsx';
 import {
   Activity,
+  AlertTriangle,
   BarChart3,
+  BrainCircuit,
   FileText,
   LayoutDashboard,
+  MapPinned,
   Menu,
   Monitor,
   Settings,
@@ -21,6 +24,10 @@ const navIcons = [
   { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
   { to: '/monitor', key: 'monitor', icon: Monitor },
   { to: '/analytics', key: 'analytics', icon: BarChart3 },
+  { to: '/intersections', key: 'intersections', icon: MapPinned },
+  { to: '/incidents', key: 'incidents', icon: AlertTriangle },
+  { to: '/recommendations', key: 'recommendations', icon: BrainCircuit },
+  { to: '/sessions', key: 'sessions', icon: FileText },
   { to: '/settings', key: 'settings', icon: Settings },
 ];
 

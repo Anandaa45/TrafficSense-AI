@@ -29,7 +29,27 @@ export async function apiPost(path, payload) {
   return response.json();
 }
 
+export async function apiPostForm(path, formData) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Gagal mengirim file ke server');
+  }
+
+  const data = await response.json();
+
+  if (data.status === 'error') {
+    throw new Error(data.message || 'Analisis AI gagal');
+  }
+
+  return data;
+}
+
 export const api = {
   get: apiGet,
   post: apiPost,
+  postForm: apiPostForm,
 };

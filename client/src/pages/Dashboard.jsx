@@ -211,20 +211,3 @@ function LegendDot({ color, label, textClass }) {
     </div>
   );
 }
-const handlePredict = async () => {
-  const response = await fetch("http://localhost:9000/api/ml/predict", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      image: "contoh-data",
-    }),
-  });
-
-  const result = await response.json();
-  console.log(result);
-};
-<button onClick={handlePredict}>
-  Jalankan AI
-</button>

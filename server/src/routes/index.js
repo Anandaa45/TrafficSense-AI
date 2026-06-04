@@ -1,7 +1,27 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
 import { pool } from '../db/pool.js';
 
 const router = Router();
+const PASSWORD_PREFIX = 'pbkdf2';
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 120000, 32, 'sha256').toString('hex');
+  return `${PASSWORD_PREFIX}$${salt}$${hash}`;
+}
+
+function verifyPassword(password, storedPassword) {
+  if (!storedPassword?.startsWith(`${PASSWORD_PREFIX}$`)) {
+    return password === storedPassword;
+  }
+
+  const [, salt, storedHash] = storedPassword.split('$');
+  const hash = crypto.pbkdf2Sync(password, salt, 120000, 32, 'sha256');
+  const stored = Buffer.from(storedHash, 'hex');
+
+  return stored.length === hash.length && crypto.timingSafeEqual(stored, hash);
+}
 
 router.get('/health', async (req, res, next) => {
   try {
@@ -29,7 +49,7 @@ router.post('/auth/register', async (req, res, next) => {
       `INSERT INTO users (username, email, role, password)
        VALUES ($1, $2, $3, $4)
        RETURNING id, username, email, role`,
-      [username, email, role || 'Operator Lalu Lintas', password]
+      [username, email, role || 'Operator Lalu Lintas', hashPassword(password)]
     );
 
     res.status(201).json({ message: 'Registrasi berhasil.', user: result.rows[0] });
@@ -51,12 +71,20 @@ router.post('/auth/login', async (req, res, next) => {
       [email]
     );
 
-    if (result.rowCount === 0 || result.rows[0].password !== password) {
+    if (result.rowCount === 0 || !verifyPassword(password, result.rows[0].password)) {
       return res.status(401).json({ message: 'Email atau password salah.' });
     }
 
+    if (!result.rows[0].password.startsWith(`${PASSWORD_PREFIX}$`)) {
+      await pool.query('UPDATE users SET password = $1 WHERE id = $2', [
+        hashPassword(password),
+        result.rows[0].id,
+      ]);
+    }
+
     const { password: hidden, ...user } = result.rows[0];
-    res.json({ message: 'Login berhasil.', token: 'demo-token', user });
+    const token = crypto.randomBytes(32).toString('hex');
+    res.json({ message: 'Login berhasil.', token, user });
   } catch (error) {
     next(error);
   }

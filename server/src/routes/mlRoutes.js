@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 
 const router = express.Router();
+const ML_API_URL = process.env.ML_API_URL || "http://localhost:5001";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -23,7 +24,7 @@ router.post("/predict", upload.single("file"), async (req, res) => {
 
     formData.append("file", blob, req.file.originalname);
 
-    const response = await fetch("http://localhost:5001/api/v1/analyze", {
+    const response = await fetch(`${ML_API_URL}/api/v1/analyze`, {
       method: "POST",
       body: formData,
     });
