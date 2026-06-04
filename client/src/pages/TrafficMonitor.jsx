@@ -15,9 +15,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../Context/LanguageContext.jsx';
 import { apiPostForm } from '../lib/api.js';
-
-const STORAGE_KEY = 'trafficSense_latest_analysis';
-const HISTORY_KEY = 'trafficSense_analysis_history';
+import { saveAnalysis, deleteAnalysis, getAnalysisHistory } from '../lib/analysisStorage.js';
 
 export default function TrafficMonitor() {
   const { t } = useLanguage();
@@ -28,13 +26,7 @@ export default function TrafficMonitor() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState('');
-  const [history, setHistory] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  });
+  const [history, setHistory] = useState(() => getAnalysisHistory());
 
   const isVideo = useMemo(() => {
     return mediaFile?.type?.startsWith('video/');
@@ -67,7 +59,6 @@ export default function TrafficMonitor() {
     setError('');
 
     try {
-      const mediaUrl = await fileToDataUrl(mediaFile);
       const formData = new FormData();
       formData.append('file', mediaFile);
 
@@ -81,7 +72,6 @@ export default function TrafficMonitor() {
         fileName: mediaFile.name,
         fileType: mediaFile.type,
         mediaType: isVideo ? 'video' : 'image',
-        mediaUrl,
         analyzedAt: new Date().toISOString(),
         totalVehicles: total,
         confidence: data.kemacetan?.total_smp ?? '-',
@@ -95,14 +85,12 @@ export default function TrafficMonitor() {
         advice: data.pesan_ai_advisor || '',
       };
 
-      const nextHistory = [result, ...history].slice(0, 10);
+      const nextHistory = await saveAnalysis(result, mediaFile);
 
       setAnalysisResult(result);
       setHistory(nextHistory);
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
     } catch (err) {
+      console.error(err);
       setError(err.message || 'Analisis AI gagal. Pastikan backend dan ML API berjalan.');
     } finally {
       setAnalyzing(false);
@@ -120,27 +108,21 @@ export default function TrafficMonitor() {
     setError('');
   }
 
-   function handleDeleteAnalysis() {
+  async function handleDeleteAnalysis() {
     if (!analysisResult) return;
-    
+
     const confirmDelete = window.confirm('Hapus hasil analisis ini?');
     if (!confirmDelete) return;
 
-  const nextHistory = history.filter((item) => item.id !== analysisResult.id);
-
-  setHistory(nextHistory);
-  setAnalysisResult(null);
-
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-
-  const latest = nextHistory[0] || null;
-
-  if (latest) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(latest));
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      const nextHistory = await deleteAnalysis(analysisResult.id);
+      setHistory(nextHistory);
+      setAnalysisResult(null);
+    } catch (err) {
+      console.error(err);
+      setError('Gagal menghapus hasil analisis.');
+    }
   }
-}
 
   function formatDate(value) {
     return new Date(value).toLocaleString('id-ID', {
@@ -154,16 +136,6 @@ export default function TrafficMonitor() {
     if (status === 'padat') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
     return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
   }
-  
-  function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 
   return (
     <div className="grid gap-5 xl:grid-cols-[340px_1fr]">
@@ -177,9 +149,7 @@ export default function TrafficMonitor() {
           <label className="mt-5 flex cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-cyan-400/40 bg-cyan-400/5 px-4 py-8 text-center transition hover:bg-cyan-400/10">
             <UploadCloud size={36} className="text-cyan-400" />
             <p className="mt-3 font-bold text-white">Pilih Foto / Video</p>
-            <p className="mt-1 text-xs text-slate-400">
-              JPG, PNG, MP4, MOV
-            </p>
+            <p className="mt-1 text-xs text-slate-400">JPG, PNG, MP4, MOV</p>
             <input
               type="file"
               accept="image/*,video/*"
@@ -198,9 +168,7 @@ export default function TrafficMonitor() {
                 )}
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-white">
-                    {mediaFile.name}
-                  </p>
+                  <p className="truncate font-bold text-white">{mediaFile.name}</p>
                   <p className="mt-1 text-xs text-slate-400">
                     {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
@@ -227,7 +195,7 @@ export default function TrafficMonitor() {
                 Belum ada riwayat analisis
               </div>
             )}
-            
+
             {history.map((item) => (
               <button
                 key={item.id}
@@ -242,9 +210,7 @@ export default function TrafficMonitor() {
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-white">
-                      {item.fileName}
-                    </p>
+                    <p className="truncate font-bold text-white">{item.fileName}</p>
                     <p className="mt-1 text-xs text-slate-400">
                       {formatDate(item.analyzedAt)}
                     </p>
@@ -308,11 +274,7 @@ export default function TrafficMonitor() {
             )}
 
             {previewUrl && isVideo && (
-              <video
-                src={previewUrl}
-                controls
-                className="h-full max-h-[520px] w-full object-contain"
-              />
+              <video src={previewUrl} controls className="h-full max-h-[520px] w-full object-contain" />
             )}
 
             {previewUrl && !isVideo && (
@@ -348,26 +310,10 @@ export default function TrafficMonitor() {
 
           {analysisResult && (
             <div className="grid gap-4 lg:grid-cols-4">
-              <ResultCard
-                icon={<Car size={22} />}
-                label="Mobil"
-                value={analysisResult.vehicleTypes.car}
-              />
-              <ResultCard
-                icon={<Bike size={22} />}
-                label="Motor"
-                value={analysisResult.vehicleTypes.motor}
-              />
-              <ResultCard
-                icon={<Bus size={22} />}
-                label="Bus"
-                value={analysisResult.vehicleTypes.bus}
-              />
-              <ResultCard
-                icon={<Truck size={22} />}
-                label="Truk"
-                value={analysisResult.vehicleTypes.truck}
-              />
+              <ResultCard icon={<Car size={22} />} label="Mobil" value={analysisResult.vehicleTypes.car} />
+              <ResultCard icon={<Bike size={22} />} label="Motor" value={analysisResult.vehicleTypes.motor} />
+              <ResultCard icon={<Bus size={22} />} label="Bus" value={analysisResult.vehicleTypes.bus} />
+              <ResultCard icon={<Truck size={22} />} label="Truk" value={analysisResult.vehicleTypes.truck} />
 
               <div className="rounded-3xl border border-white/10 bg-white/5 p-5 lg:col-span-2">
                 <p className="text-sm text-slate-400">Total Kendaraan</p>
@@ -404,15 +350,15 @@ export default function TrafficMonitor() {
                   </p>
                 )}
               </div>
-              
+
               <div className="lg:col-span-4">
                 <button
-                 onClick={handleDeleteAnalysis}
-                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 font-bold text-rose-400 transition hover:bg-rose-500/20" >
+                  onClick={handleDeleteAnalysis}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-3 font-bold text-rose-400 transition hover:bg-rose-500/20"
+                >
                   <Trash2 size={18} /> Hapus Hasil Analisis
-                  </button>
+                </button>
               </div>
-
             </div>
           )}
         </section>
@@ -429,9 +375,7 @@ function ResultCard({ icon, label, value }) {
         <p className="font-bold">{label}</p>
       </div>
 
-      <p className="mt-4 text-4xl font-extrabold text-white">
-        {value}
-      </p>
+      <p className="mt-4 text-4xl font-extrabold text-white">{value}</p>
     </div>
   );
 }
