@@ -466,7 +466,7 @@ export default function TrafficMonitor() {
         </section>
 
         <section className={`rounded-3xl border p-5 ${panelClass}`}>
-          <h3 className="text-lg font-extrabold">Hasil Upload</h3>
+          <h3 className="text-lg font-extrabold">{tm.uploadResult}</h3>
 
           <div className="mt-4 space-y-3">
             {history.length === 0 && (
@@ -498,7 +498,7 @@ export default function TrafficMonitor() {
                         {item.status}
                       </span>
                       <span className="text-xs font-bold text-cyan-400">
-                        {item.totalVehicles} kendaraan
+                        {item.totalVehicles} {tm.vehicles}
                       </span>
                     </div>
                   </div>
@@ -515,7 +515,7 @@ export default function TrafficMonitor() {
             <div>
               <h3 className="text-xl font-extrabold">Preview Media</h3>
               <p className={`mt-1 text-sm ${mutedText}`}>
-                Media yang di-upload akan tampil di sini sebelum dianalisis.
+                {tm.previewMediaSub}
               </p>
             </div>
 
@@ -544,10 +544,10 @@ export default function TrafficMonitor() {
               <div className="px-6 text-center">
                 <UploadCloud size={56} className="mx-auto text-cyan-400" />
                 <h4 className={`mt-4 text-2xl font-extrabold ${titleText}`}>
-                  Belum ada media dipilih
+                  {tm.noMediaSelected}
                 </h4>
                 <p className={`mt-2 text-sm ${mutedText}`}>
-                  Upload foto atau video dari panel kiri untuk mulai analisis.
+                  {tm.noMediaSub}
                 </p>
               </div>
             )}
@@ -578,12 +578,12 @@ export default function TrafficMonitor() {
         <section className={`rounded-3xl border p-5 ${panelClass}`}>
           <div className="mb-4 flex items-center gap-2">
             <FileCheck size={20} className="text-cyan-400" />
-            <h3 className="text-xl font-extrabold">Hasil Analisis</h3>
+            <h3 className="text-xl font-extrabold">{tm.analysisResult}</h3>
           </div>
 
           {!analysisResult && (
             <div className={`rounded-2xl border p-8 text-center ${mutedText} ${resultCardClass}`}>
-              Belum ada hasil. Upload media lalu klik tombol Analisis AI.
+              {tm.noResult}
             </div>
           )}
 
