@@ -18,6 +18,9 @@ import { useTheme } from '../Context/ThemeContext.jsx';
 import { apiPostForm } from '../lib/api.js';
 import { saveAnalysis, deleteAnalysis, getAnalysisHistory, getMediaUrl } from '../lib/analysisStorage.js';
 
+const FRAME_WIDTH = 180;
+const FRAME_HEIGHT = 120;
+
 export default function TrafficMonitor() {
   const { t } = useLanguage();
   const { isDark } = useTheme();
@@ -54,6 +57,126 @@ export default function TrafficMonitor() {
     return 'lancar';
   }
 
+  async function extractFrame(file) {
+    const url = URL.createObjectURL(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = FRAME_WIDTH;
+    canvas.height = FRAME_HEIGHT;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    try {
+      if (file.type?.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        video.src = url;
+
+        await new Promise((resolve, reject) => {
+          video.onloadedmetadata = resolve;
+          video.onerror = reject;
+        });
+
+        if (Number.isFinite(video.duration) && video.duration > 1) {
+          video.currentTime = Math.min(1, video.duration * 0.15);
+          await new Promise((resolve) => {
+            video.onseeked = resolve;
+            setTimeout(resolve, 800);
+          });
+        }
+
+        ctx.drawImage(video, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+      } else {
+        const image = new Image();
+        image.src = url;
+
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+        });
+
+        ctx.drawImage(image, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+      }
+
+      return ctx.getImageData(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function getPixelStats(imageData) {
+    const { data, width, height } = imageData;
+    let roadLike = 0;
+    let brightLights = 0;
+    let lowerPixels = 0;
+    let edgePixels = 0;
+    let sampled = 0;
+    let saturatedPosterPixels = 0;
+
+    for (let y = 0; y < height; y += 2) {
+      for (let x = 0; x < width; x += 2) {
+        const index = (y * width + x) * 4;
+        const r = data[index];
+        const g = data[index + 1];
+        const b = data[index + 2];
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+        const saturation = max === 0 ? 0 : (max - min) / max;
+        const isLowerHalf = y > height * 0.42;
+
+        sampled += 1;
+
+        if (isLowerHalf) {
+          lowerPixels += 1;
+
+          if (saturation < 0.28 && luma > 18 && luma < 185) {
+            roadLike += 1;
+          }
+        }
+
+        if (luma > 185 && saturation < 0.45 && y > height * 0.2) {
+          brightLights += 1;
+        }
+
+        if (saturation > 0.72 && (r > 170 || b > 170) && y > height * 0.25) {
+          saturatedPosterPixels += 1;
+        }
+
+        if (x + 2 < width && y + 2 < height) {
+          const right = ((y * width + x + 2) * 4);
+          const down = (((y + 2) * width + x) * 4);
+          const rightLuma = 0.299 * data[right] + 0.587 * data[right + 1] + 0.114 * data[right + 2];
+          const downLuma = 0.299 * data[down] + 0.587 * data[down + 1] + 0.114 * data[down + 2];
+
+          if (Math.abs(luma - rightLuma) + Math.abs(luma - downLuma) > 70) {
+            edgePixels += 1;
+          }
+        }
+      }
+    }
+
+    return {
+      roadRatio: lowerPixels ? roadLike / lowerPixels : 0,
+      lightRatio: sampled ? brightLights / sampled : 0,
+      edgeRatio: sampled ? edgePixels / sampled : 0,
+      posterRatio: sampled ? saturatedPosterPixels / sampled : 0,
+    };
+  }
+
+  async function validateTrafficMedia(file) {
+    const frame = await extractFrame(file);
+    const stats = getPixelStats(frame);
+    const roadAndEdges = stats.roadRatio > 0.28 && stats.edgeRatio > 0.035;
+    const nightTraffic = stats.roadRatio > 0.18 && stats.lightRatio > 0.006 && stats.edgeRatio > 0.025;
+    const likelyPoster = stats.posterRatio > 0.22 && stats.roadRatio < 0.18;
+
+    return {
+      ok: !likelyPoster && (roadAndEdges || nightTraffic),
+      stats,
+    };
+  }
+
   function createClientFallbackResult(file) {
     const seed = file.size + file.name.length;
     const motor = (seed % 28) + 12;
@@ -82,6 +205,25 @@ export default function TrafficMonitor() {
 
     setAnalyzing(true);
     setError('');
+
+    let validation;
+
+    try {
+      validation = await validateTrafficMedia(mediaFile);
+    } catch (err) {
+      console.error(err);
+      setAnalysisResult(null);
+      setError('Media tidak bisa dibaca. Gunakan file JPG, PNG, MP4, atau MOV yang valid.');
+      setAnalyzing(false);
+      return;
+    }
+
+    if (!validation.ok) {
+      setAnalysisResult(null);
+      setError('Media ditolak. Sistem hanya menerima foto/video yang terlihat seperti lalu lintas jalan, CCTV jalan, antrean kendaraan, atau rekaman jalan.');
+      setAnalyzing(false);
+      return;
+    }
 
     try {
       const formData = new FormData();

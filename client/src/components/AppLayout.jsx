@@ -324,7 +324,7 @@ export default function AppLayout() {
   </div>
 </header>
 
-        <main className="relative z-40 p-4 md:p-6">
+        <main className="relative p-4 md:p-6">
           <Outlet />
         </main>
       </div>
