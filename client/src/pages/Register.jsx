@@ -19,6 +19,21 @@ const initialForm = {
   confirmPassword: '',
 };
 
+function buildUserProfile(user) {
+  return {
+    id: user.id || Date.now(),
+    username: user.username || 'User',
+    name: user.username || 'User',
+    email: user.email || '-',
+    role: user.role || 'User',
+    location: 'Indonesia',
+    country: 'Indonesia',
+    company: 'TrafficSense Platform',
+    org: 'TrafficSense Platform',
+    joinedAt: new Date().toISOString(),
+  };
+}
+
 export default function Register() {
   const [form, setForm] = useState(initialForm);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,10 +44,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleChange = (field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (event) => {
@@ -54,11 +66,18 @@ export default function Register() {
         password: form.password,
       };
 
+      let result;
+
       try {
-        await api.post('/auth/register', payload);
+        result = await api.post('/auth/register', payload);
       } catch {
-        registerLocalUser(payload);
+        result = registerLocalUser(payload);
       }
+
+      const user = result?.data?.user || result?.user || payload;
+      const profile = buildUserProfile(user);
+
+      localStorage.setItem('trafficSense_registered_user', JSON.stringify(profile));
 
       navigate('/login');
     } catch (err) {
@@ -87,50 +106,13 @@ export default function Register() {
         </p>
 
         <div className="mt-8 space-y-5">
-          <InputField
-            label="USERNAME"
-            icon={<User size={18} />}
-            placeholder="john_doe"
-            value={form.username}
-            onChange={(value) => handleChange('username', value)}
-            required
-          />
+          <InputField label="USERNAME" icon={<User size={18} />} placeholder="john_doe" value={form.username} onChange={(value) => handleChange('username', value)} required />
+          <InputField label="EMAIL INSTANSI" icon={<Mail size={18} />} type="email" placeholder="nama@dishub.go.id" value={form.email} onChange={(value) => handleChange('email', value)} required />
+          <InputField label="JABATAN / ROLE (OPSIONAL)" icon={<BriefcaseBusiness size={18} />} placeholder="Operator Lalu Lintas" value={form.role} onChange={(value) => handleChange('role', value)} />
 
-          <InputField
-            label="EMAIL INSTANSI"
-            icon={<Mail size={18} />}
-            type="email"
-            placeholder="nama@dishub.go.id"
-            value={form.email}
-            onChange={(value) => handleChange('email', value)}
-            required
-          />
+          <PasswordField label="PASSWORD" placeholder="Min. 8 karakter" value={form.password} onChange={(value) => handleChange('password', value)} show={showPassword} onToggle={() => setShowPassword((prev) => !prev)} />
 
-          <InputField
-            label="JABATAN / ROLE (OPSIONAL)"
-            icon={<BriefcaseBusiness size={18} />}
-            placeholder="Operator Lalu Lintas"
-            value={form.role}
-            onChange={(value) => handleChange('role', value)}
-          />
-
-          <PasswordField
-            label="PASSWORD"
-            placeholder="Min. 8 karakter"
-            value={form.password}
-            onChange={(value) => handleChange('password', value)}
-            show={showPassword}
-            onToggle={() => setShowPassword((prev) => !prev)}
-          />
-
-          <PasswordField
-            label="KONFIRMASI PASSWORD"
-            placeholder="Ulangi password"
-            value={form.confirmPassword}
-            onChange={(value) => handleChange('confirmPassword', value)}
-            show={showConfirmPassword}
-            onToggle={() => setShowConfirmPassword((prev) => !prev)}
-          />
+          <PasswordField label="KONFIRMASI PASSWORD" placeholder="Ulangi password" value={form.confirmPassword} onChange={(value) => handleChange('confirmPassword', value)} show={showConfirmPassword} onToggle={() => setShowConfirmPassword((prev) => !prev)} />
 
           {error ? (
             <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600">
@@ -149,10 +131,7 @@ export default function Register() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Sudah punya akun?{' '}
-          <Link
-            to="/login"
-            className="font-bold text-cyan-600 transition hover:text-cyan-500"
-          >
+          <Link to="/login" className="font-bold text-cyan-600 transition hover:text-cyan-500">
             Masuk sekarang
           </Link>
         </p>
@@ -161,70 +140,25 @@ export default function Register() {
   );
 }
 
-function InputField({
-  label,
-  icon,
-  type = 'text',
-  placeholder,
-  value,
-  onChange,
-  required = false,
-}) {
+function InputField({ label, icon, type = 'text', placeholder, value, onChange, required = false }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">
-        {label}
-      </span>
-
+      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">{label}</span>
       <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-500 shadow-sm transition focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
-        <input
-          type={type}
-          required={required}
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
-        />
-
-        <span className="text-slate-400">
-          {icon}
-        </span>
+        <input type={type} required={required} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400" />
+        <span className="text-slate-400">{icon}</span>
       </div>
     </label>
   );
 }
 
-function PasswordField({
-  label,
-  placeholder,
-  value,
-  onChange,
-  show,
-  onToggle,
-}) {
+function PasswordField({ label, placeholder, value, onChange, show, onToggle }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">
-        {label}
-      </span>
-
+      <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-slate-600">{label}</span>
       <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-500 shadow-sm transition focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-100">
-        <input
-          type={show ? 'text' : 'password'}
-          required
-          minLength={8}
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
-        />
-
-        <button
-          type="button"
-          onClick={onToggle}
-          className="text-slate-400 transition hover:text-cyan-500"
-          aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
-        >
+        <input type={show ? 'text' : 'password'} required minLength={8} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400" />
+        <button type="button" onClick={onToggle} className="text-slate-400 transition hover:text-cyan-500">
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>

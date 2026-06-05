@@ -18,7 +18,7 @@ import { useDateFormat, DATE_FORMAT_OPTIONS } from '../Context/DateFormatContext
 
 const tabs = ['Akun', 'Model AI'];
 
-// ─── Token tema terpusat ───────────────────────────────────────────────────
+// ─── Token tema terpusat
 function useTokens(isDark) {
   return {
     page: isDark
@@ -91,7 +91,7 @@ function useTokens(isDark) {
   };
 }
 
-// ─── Root ──────────────────────────────────────────────────────────────────
+// ─── Root
 export default function Settings() {
   const { lang, setLang, t } = useLanguage();
   const { themeMode, setThemeMode, activeTheme, isDark } = useTheme();
@@ -154,7 +154,7 @@ export default function Settings() {
   );
 }
 
-// ─── Section wrapper ───────────────────────────────────────────────────────
+// ─── Section wrapper
 function Section({ title, icon, children, tk }) {
   return (
     <section className={`rounded-2xl p-5 transition-colors ${tk.card}`}>
@@ -167,7 +167,7 @@ function Section({ title, icon, children, tk }) {
   );
 }
 
-// ─── Tab: Akun ─────────────────────────────────────────────────────────────
+// ─── Tab: Akun (Profile)
 function Akun({
   themeMode,
   setThemeMode,
@@ -337,7 +337,7 @@ function Akun({
   );
 }
 
-// ─── Tab: Model AI ─────────────────────────────────────────────────────────
+// ─── Tab: Model AI 
 function ModelAI({ isDark, tk, t }) {
   const m = t.modelAI;
 
@@ -377,7 +377,6 @@ function ModelAI({ isDark, tk, t }) {
   );
 }
 
-// ─── Primitives ────────────────────────────────────────────────────────────
 function InfoField({ label, value, tk }) {
   return (
     <div className={`rounded-xl p-4 transition-colors ${tk.row}`}>
