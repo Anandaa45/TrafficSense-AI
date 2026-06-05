@@ -241,17 +241,6 @@ export default function TrafficMonitor() {
     setAnalyzing(true);
     setError('');
 
-    let validation;
-
-    try {
-      validation = await validateTrafficMedia(mediaFile);
-    } catch (err) {
-      console.error(err);
-      setAnalysisResult(null);
-      setError('Media tidak bisa dibaca. Gunakan file JPG, PNG, MP4, atau MOV yang valid.');
-      setAnalyzing(false);
-      return;
-    }
 
     try {
       const formData = new FormData();
@@ -300,12 +289,6 @@ export default function TrafficMonitor() {
       setHistory(nextHistory);
     } catch (err) {
       console.error(err);
-
-      if (!validation.ok) {
-        setAnalysisResult(null);
-        setError('Media ditolak. Sistem hanya menerima foto/video lalu lintas jalan, CCTV jalan, antrean kendaraan, atau rekaman jalan.');
-        return;
-      }
 
       const result = createClientFallbackResult(mediaFile);
       const nextHistory = await saveAnalysis(result, mediaFile);
