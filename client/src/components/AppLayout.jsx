@@ -33,6 +33,30 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
 
   const [now, setNow] = useState(() => new Date());
+  const currentUser = (() => {
+  try {
+    const auth = JSON.parse(
+      localStorage.getItem('trafficSense_auth') || '{}'
+    );
+
+    return auth.user || {};
+  } catch {
+    return {};
+  }
+})();
+
+const userName =
+  currentUser.username ||
+  currentUser.name ||
+  currentUser.email ||
+  'User';
+
+const userInitials = userName
+  .split(' ')
+  .map((word) => word.charAt(0))
+  .join('')
+  .substring(0, 2)
+  .toUpperCase();
 
   useEffect(() => {
     function syncSidebarWithViewport() {
@@ -337,10 +361,11 @@ export default function AppLayout() {
 
     {/* Avatar */}
     <NavLink
-      to="/profile"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
+    to="/profile"
+    title={userName}
+    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/20"
     >
-      L
+      {userInitials}
     </NavLink>
   </div>
 </header>
